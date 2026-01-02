@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import UnionIcon from "../../../assets/icons/Union-icon.svg";
-import BookApiICon from "../../../assets/icons/bookapis-icon.svg";
+import BookApiICon from "../../../assets/icons/Bookapis-icon.svg";
 import { selectVendorById } from '../../../features/vendor/vendorSlice';
 import { setBreadcrumbs } from '../../../features/breadcrumb/breadcrumbSlice';
 
