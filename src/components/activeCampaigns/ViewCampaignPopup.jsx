@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import CustomTextField from "../CustomTextField";
-import editIcon from "../../assets/icons/edit-icon.svg";
+import editIcon from "../../assets/icons/Edit-icon.svg";
 import crossIcon from "../../assets/icons/cross-icon.svg";
 import CustomButton from "../CustomButton";
 
