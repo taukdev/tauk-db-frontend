@@ -10,7 +10,7 @@ import { useLogin } from "../../hooks/auth/useLogin.js";
 import { getIsLoggedIn } from "../../auth/authStorage.js";
 
 import bg from "../../assets/bg-image.png";
-import taukLogo from "../../assets/tauk-logo.svg";
+import taukLogo from "../../assets/Tauk-Logo.svg";
 import googleIcon from "../../assets/google.svg"; 
 
 export default function LoginComponent() {

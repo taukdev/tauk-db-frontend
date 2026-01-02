@@ -4,7 +4,7 @@ import CustomTextField from "../CustomTextField";
 import { useNavigate } from "react-router-dom";
 
 import bg from "../../assets/bg-image.png";
-import taukLogo from "../../assets/tauk-logo.svg";
+import taukLogo from "../../assets/Tauk-Logo.svg";
 import leftArrow from "../../assets/left-arrow.svg";
 import CustomButton from "../CustomButton";
 
