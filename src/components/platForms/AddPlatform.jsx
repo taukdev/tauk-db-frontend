@@ -4,7 +4,7 @@ import * as Yup from "yup";
 import CustomTextField from "../CustomTextField";
 import { Link } from "react-router-dom";
 import UnionIcon from "../../assets/icons/Union-icon.svg";
-import DangerCircleIcon from "../../assets/icons/DangerCircle-Icon.svg";
+import DangerCircleIcon from "../../assets/icons/DangerCircle-icon.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { setBreadcrumbs } from "../../features/breadcrumb/breadcrumbSlice";
 import CustomButton from "../CustomButton";
