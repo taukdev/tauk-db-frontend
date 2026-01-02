@@ -45,7 +45,6 @@ export const store = configureStore({
     importedData: importedDataReducer,
     leadDeliveryReport: leadDeliveryReportReducer,
     scrubReport: scrubReportReducer,
-    scrubReport: scrubReportReducer,
     activeCampaigns: activeCampaignsReducer,
     biddingPosts: biddingPostsReducer,
   },
