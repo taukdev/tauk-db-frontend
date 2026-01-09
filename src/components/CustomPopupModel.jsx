@@ -1,5 +1,5 @@
 // src/components/CustomPopupModel.jsx
-import React from "react";
+
 import ReactDOM from "react-dom";
 import { useNavigate } from "react-router-dom";
 import CrossIcon from "../assets/icons/cross-icon.svg";
@@ -69,13 +69,15 @@ export default function CustomPopupModel({
         </button>
 
         {/* Illustration */}
-        <div className="flex justify-center mb-6">
-          <img
-            src={displayImage}
-            alt="Popup Illustration"
-            className={`${isLogoutPopup ? "w-42" : "w-35"} ${isLogoutPopup ? "h-42" : "h-35"}`}
-          />
-        </div>
+        {displayImage && (
+          <div className="flex justify-center mb-6">
+            <img
+              src={displayImage}
+              alt="Popup Illustration"
+              className={`${isLogoutPopup ? "w-42" : "w-35"} ${isLogoutPopup ? "h-42" : "h-35"}`}
+            />
+          </div>
+        )}
 
         {/* Title */}
         <h2 className="text-xl sm:text-2xl px-2 inline-block font-bold">{displayTitle}</h2>

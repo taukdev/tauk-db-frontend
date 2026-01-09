@@ -153,6 +153,7 @@ function VendorListAdd() {
 
         const payload = {
           list_name: values.listName,
+          vendor_id: convertToInt(vendorId),
           fixed_cost_per_lead: Number(values.costPerLead) || 0,
           list_vertical: convertToInt(values.listVertical),
           owner_revshare_percent: Number(values.ownerReshare) || 0,

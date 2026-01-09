@@ -1,5 +1,5 @@
 import { apiJson, axiosInstance } from "./http.js";
-import { GET_VENDORS_PATH, GET_VENDOR_BY_ID_PATH, UPDATE_VENDOR_PATH, ACTIVATE_VENDOR_PATH, DEACTIVATE_VENDOR_PATH, GET_VENDOR_TYPES_PATH, GET_PAYMENT_TERMS_PATH, GET_COUNTRIES_PATH, GET_STATES_BY_COUNTRY_PATH, CREATE_VENDOR_PATH, SEARCH_VENDORS_PATH, GET_VENDOR_LISTS_PATH, CREATE_LIST_PATH, UPDATE_LIST_PATH, ACTIVATE_LIST_PATH, DEACTIVATE_LIST_PATH, GET_LIST_BY_ID_PATH, GET_LIST_VERTICAL_PATH, GET_DEDUPE_BACK_PATH, UPLOAD_CSV_PATH } from "./ConstAPI.jsx";
+import { GET_VENDORS_PATH, GET_VENDOR_BY_ID_PATH, UPDATE_VENDOR_PATH, ACTIVATE_VENDOR_PATH, DEACTIVATE_VENDOR_PATH, GET_VENDOR_TYPES_PATH, GET_PAYMENT_TERMS_PATH, GET_COUNTRIES_PATH, GET_STATES_BY_COUNTRY_PATH, CREATE_VENDOR_PATH, SEARCH_VENDORS_PATH, GET_VENDOR_LISTS_PATH, CREATE_LIST_PATH, UPDATE_LIST_PATH, ACTIVATE_LIST_PATH, DEACTIVATE_LIST_PATH, GET_LIST_BY_ID_PATH, GET_LIST_VERTICAL_PATH, GET_DEDUPE_BACK_PATH, UPLOAD_CSV_PATH, GET_VENDOR_API_CONFIGS_PATH,UPDATE_LIST_STATUS_PATH } from "./ConstAPI.jsx";
 
 /**
  * Get vendor by ID
@@ -185,12 +185,29 @@ export async function deactivateVendorApi(vendorId) {
  * Get all general lists (paginated)
  * @param {number} page
  * @param {number} limit
+ * @param {string|number} vendorId - Optional vendor ID to filter lists by vendor
  */
-export async function getVendorListsApi(page = 1, limit = 10) {
+export async function getVendorListsApi(
+  page = 1,
+  limit = 10,
+  vendorId = null,
+  listStatus = null
+) {
   const queryParams = new URLSearchParams({
     page: page.toString(),
     limit: limit.toString(),
   });
+
+  if (vendorId) {
+    queryParams.append("vendor_id", vendorId.toString());
+  }
+
+  // Optionally send list status (e.g., "active", "archived") so backend
+  // can filter server-side. This follows the user's request to send
+  // listStatus together with vendorId.
+  if (listStatus) {
+    queryParams.append("list_status", listStatus.toString());
+  }
 
   return await apiJson(`${GET_VENDOR_LISTS_PATH}?${queryParams}`, {
     method: "GET",
@@ -272,6 +289,26 @@ export async function deactivateListApi(listId) {
 }
 
 /**
+ * Update list status (e.g., archived, active)
+ * PATCH /general/list/status/:listId
+ * @param {string|number} listId
+ * @param {string} status - New status value (e.g., "archived", "active")
+ */
+export async function updateListStatusApi(listId, status) {
+  if (!listId) {
+    throw new Error("List ID is required");
+  }
+  if (!status) {
+    throw new Error("Status is required");
+  }
+
+  return await apiJson(`${UPDATE_LIST_STATUS_PATH}/${listId}`, {
+    method: "PATCH",
+    json: { status },
+  });
+}
+
+/**
  * Get list vertical
  * @returns {Promise} API response with list vertical data
  */
@@ -287,6 +324,21 @@ export async function getListVerticalApi() {
  */
 export async function getDedupeBackApi() {
   return await apiJson(GET_DEDUPE_BACK_PATH, {
+    method: "GET",
+  });
+}
+
+/**
+ * Get vendor API configs (all lists with API configs for a vendor)
+ * @param {string|number} vendorId - Vendor ID
+ * @returns {Promise} API response with vendor data and lists with api_configs
+ */
+export async function getVendorApiConfigsApi(vendorId) {
+  if (!vendorId) {
+    throw new Error("Vendor ID is required");
+  }
+
+  return await apiJson(`${GET_VENDOR_API_CONFIGS_PATH}/${vendorId}`, {
     method: "GET",
   });
 }

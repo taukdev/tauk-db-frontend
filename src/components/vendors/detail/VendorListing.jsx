@@ -8,8 +8,9 @@ import cloudUploadIcon from "../../../assets/icons/cloud-upload.svg";
 import CustomButton from "../../CustomButton";
 import Pagination from "../../common/Pagination";
 import LoadingSpinner from "../../common/LoadingSpinner";
+import CustomPopupModel from "../../CustomPopupModel";
 
-import { getVendorListsApi } from "../../../api/vendors";
+import { getVendorListsApi, updateListStatusApi } from "../../../api/vendors";
 
 const statusStyles = {
   Active: "bg-green-100 text-green-600 border border-[#17C65333]",
@@ -28,6 +29,11 @@ function VendorLists({ vendorName }) {
   const [lists, setLists] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(null);
+
+  // Modal state for archive/unarchive confirmation
+  const [modalOpen, setModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
 
   // sorting
   const [sortBy, setSortBy] = useState(null);
@@ -37,7 +43,14 @@ function VendorLists({ vendorName }) {
     try {
       setLoading(true);
 
-      const res = await getVendorListsApi(currentPage, rowsPerPage);
+      // Send vendorId and current activeTab (as listStatus) so backend
+      // can filter server-side. activeTab is "active" or "archived".
+      const res = await getVendorListsApi(
+        currentPage,
+        rowsPerPage,
+        id,
+        activeTab
+      );
 
       let rawData = [];
       let paginationData = null;
@@ -92,7 +105,7 @@ function VendorLists({ vendorName }) {
 
   useEffect(() => {
     fetchLists();
-  }, [currentPage, rowsPerPage, activeTab]);
+  }, [currentPage, rowsPerPage, activeTab, id]);
 
   // FILTER (Active / Archived)
   const filteredByStatus = useMemo(() => {
@@ -277,12 +290,28 @@ function VendorLists({ vendorName }) {
                   <td className="px-3 py-4">{item.vertical}</td>
                   <td className="px-3 py-4">{item.records}</td>
                   <td className="px-3 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs ${statusStyles[item.status]
-                        }`}
-                    >
-                      {item.status}
-                    </span>
+                    <div className="inline-block">
+                      {actionLoading === item.id ? (
+                        <LoadingSpinner size="sm" />
+                      ) : (
+                        <button
+                          onClick={() => {
+                            const isArchived = (item.status || "").toLowerCase() === "archived";
+                            setPendingAction({
+                              itemId: item.id,
+                              itemName: item.listName,
+                              isArchived,
+                              newStatus: isArchived ? "active" : "archived",
+                            });
+                            setModalOpen(true);
+                          }}
+                          title={ (item.status || "").toLowerCase() === "archived" ? "Unarchive" : "Archive" }
+                          className={`px-3 py-1 rounded-full text-xs ${statusStyles[item.status]}`}
+                        >
+                          {item.status}
+                        </button>
+                      )}
+                    </div>
                   </td>
                   <td className="px-3 py-4">
                     <Link to={`/vendor/list/${item.id}/api-posting-instruction`} className="text-primary underline decoration-dashed underline-offset-4">
@@ -317,6 +346,35 @@ function VendorLists({ vendorName }) {
           rowsPerPageOptions={[5, 10, 20]}
         />
       </div>
+
+      {/* Archive/Unarchive Confirmation Modal */}
+      <CustomPopupModel
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setPendingAction(null);
+        }}
+        onConfirm={async () => {
+          if (!pendingAction) return;
+          try {
+            setActionLoading(pendingAction.itemId);
+            await updateListStatusApi(pendingAction.itemId, pendingAction.newStatus);
+            await fetchLists();
+          } catch (err) {
+            console.error("Error updating list status:", err);
+          } finally {
+            setActionLoading(null);
+            setModalOpen(false);
+            setPendingAction(null);
+          }
+        }}
+        title={pendingAction?.isArchived ? "Unarchive List" : "Archive List"}
+        message={pendingAction?.isArchived
+          ? `Are you sure you want to unarchive "${pendingAction?.itemName}"?`
+          : `Are you sure you want to archive "${pendingAction?.itemName}"?`
+        }
+        actionButtonName={pendingAction?.isArchived ? "Unarchive" : "Archive"}
+      />
     </div>
   );
 }

@@ -98,62 +98,64 @@ const ActiveList = ({ title = "Active Lists" }) => {
   const [vendorLists, setVendorLists] = useState([]);
   const [listsLoading, setListsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Fetch vendor lists for selected vendor (random or first) - fetch all, then filter and paginate client-side
   useEffect(() => {
     const fetchVendorLists = async () => {
       if (!selectedVendorId) {
         setVendorLists([]);
+        setTotalItems(0);
         return;
       }
-      
+
       try {
         setListsLoading(true);
-        // Fetch a large number of lists to get all vendor lists
-        const res = await getVendorListsApi(1, 1000);
+        // Request server-side paginated lists filtered by vendor and active status
+        const res = await getVendorListsApi(currentPage, rowsPerPage, selectedVendorId, "active");
 
         let rawData = [];
+        let pagination = null;
 
         if (Array.isArray(res)) {
           rawData = res;
         } else if (res?.data && Array.isArray(res.data)) {
           rawData = res.data;
+          pagination = res.pagination;
         } else if (res?.data?.data && Array.isArray(res.data.data)) {
           rawData = res.data.data;
+          pagination = res.data.pagination || res.pagination;
         } else if (Array.isArray(res?.data?.lists)) {
           rawData = res.data.lists;
+          pagination = res.data.pagination || res.pagination;
         }
 
-        // Filter lists by selected vendor ID and transform data
-        const transformedData = rawData
-          .filter((item) => {
-            const vendorId = item.vendor_id || item.vendorId || item.created_by || item.createdBy;
-            return String(vendorId) === String(selectedVendorId);
-          })
-          .map((item) => ({
-            id: item.id,
-            name: item.listName || item.list_name || "-",
-            totalLeadCount: item.records || item.sell_times || 0,
-            importStats: {
-              imported: 0, // These would come from import stats API if available
-              failed: 0,
-              skipped: 0,
-            },
-            vendorName: selectedVendor?.name || "Unknown Vendor",
-          }));
+        const transformedData = rawData.map((item) => ({
+          id: item.id,
+          name: item.listName || item.list_name || "-",
+          totalLeadCount: item.records || item.sell_times || 0,
+          importStats: {
+            imported: 0,
+            failed: 0,
+            skipped: 0,
+          },
+          vendorName: selectedVendor?.name || item?.Vendor?.vendor_name || "Unknown Vendor",
+        }));
 
         setVendorLists(transformedData);
+        setTotalItems(pagination?.totalItems || pagination?.total || res?.pagination?.totalItems || res?.pagination?.total || transformedData.length);
       } catch (error) {
         console.error("Error fetching vendor lists:", error);
         setVendorLists([]);
+        setTotalItems(0);
       } finally {
         setListsLoading(false);
       }
     };
 
     fetchVendorLists();
-  }, [selectedVendorId, selectedVendor?.name]);
+  }, [selectedVendorId, currentPage, rowsPerPage, selectedVendor?.name]);
 
   // get vendor by name or fallback to first vendor
   const getVendorById = (vendorName) => {
@@ -265,17 +267,11 @@ const ActiveList = ({ title = "Active Lists" }) => {
     return sortDir === "asc" ? sorted : sorted.reverse();
   }, [filteredLists, sortBy, sortDir]);
 
-  // Pagination
-  const totalItems = sortedLists.length;
-  // handle "Unlimited" if ever passed — here it's always a number
-  const effectiveRowsPerPage =
-    rowsPerPage === "Unlimited" ? totalItems || 1 : Number(rowsPerPage || 1);
-  const totalPages = Math.max(1, Math.ceil(totalItems / effectiveRowsPerPage));
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * effectiveRowsPerPage;
-    const end = start + effectiveRowsPerPage;
-    return sortedLists.slice(start, end);
-  }, [sortedLists, currentPage, effectiveRowsPerPage]);
+  // Pagination (server-side): use `totalItems` from API and treat `sortedLists`
+  // as the current page data (server returns paginated results).
+  const effectiveRowsPerPage = Number(rowsPerPage || 1);
+  const totalPages = Math.max(1, Math.ceil((totalItems || 0) / effectiveRowsPerPage));
+  const paginatedData = sortedLists; // server already returned current page
 
   // Reset page to 1 when search or rowsPerPage changes
   useEffect(() => {

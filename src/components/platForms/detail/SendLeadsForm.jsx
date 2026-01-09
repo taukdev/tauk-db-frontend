@@ -43,14 +43,18 @@ const leadFieldsList = [
 ];
 
 const validationSchema = Yup.object({
-  orderType: Yup.string().required("Order type is required"),
-  testPurpose: Yup.bool().required(),
-  internalView: Yup.bool().required(),
+  // Only pickLists is required
+  pickLists: Yup.array().min(1, "Please select at least one list"),
+  
+  // All other fields are optional
+  orderType: Yup.string().nullable(),
+  testPurpose: Yup.bool().nullable(),
+  internalView: Yup.bool().nullable(),
   leadsQuantity: Yup.number().nullable(),
   pricePerRecord: Yup.number().nullable(),
-  sortOrder: Yup.string().required("Sort order is required"),
-  leadFields: Yup.array().min(1, "Select at least one field"),
-  fieldStrictness: Yup.string().oneOf(["strict", "loose"]).required(),
+  sortOrder: Yup.string().nullable(),
+  leadFields: Yup.array().nullable(), // Removed min requirement
+  fieldStrictness: Yup.string().oneOf(["strict", "loose"]).nullable(),
   areaCodes: Yup.string()
     .nullable()
     .test(
@@ -62,16 +66,16 @@ const validationSchema = Yup.object({
         return validCharacters.test(value);
       }
     ),
-  excludeAreaCodes: Yup.bool(),
+  excludeAreaCodes: Yup.bool().nullable(),
   excludeIsps: Yup.string().nullable(),
   includeIsps: Yup.string().nullable(),
-  genderMale: Yup.boolean(),
-  genderFemale: Yup.boolean(),
-  selectedStates: Yup.array().of(Yup.string()),
-  excludeStates: Yup.bool(),
+  genderMale: Yup.boolean().nullable(),
+  genderFemale: Yup.boolean().nullable(),
+  selectedStates: Yup.array().of(Yup.string()).nullable(),
+  excludeStates: Yup.bool().nullable(),
   customFilters: Yup.array().of(
     Yup.object({
-      customField: Yup.string().required("Field selection is required"),
+      customField: Yup.string().nullable(), // Made optional
       customValue: Yup.string()
         .nullable()
         .test(
@@ -82,11 +86,11 @@ const validationSchema = Yup.object({
             return isNaN(Number(value));
           }
         ),
-      filterType: Yup.string().oneOf(["Include", "Exclude"]).required(),
+      filterType: Yup.string().oneOf(["Include", "Exclude"]).nullable(), // Made optional
     })
-  ),
+  ).nullable(),
   
-  disregardLocks: Yup.bool(),
+  disregardLocks: Yup.bool().nullable(),
   dedupeDaysBack: Yup.string().nullable(),
 });
 
@@ -544,8 +548,10 @@ const SendLeadsForm = () => {
       }
     }
 
-    // Map selected fields
-    const selectedFields = values.leadFields.map((field) => fieldNameMap[field] || field.toLowerCase().replace(/\s+/g, "_"));
+    // Map selected fields - handle empty array
+    const selectedFields = (values.leadFields && values.leadFields.length > 0)
+      ? values.leadFields.map((field) => fieldNameMap[field] || field.toLowerCase().replace(/\s+/g, "_"))
+      : [];
 
     // Format signup dates
     const signupDatesString = values.signupStartDate && values.signupEndDate
@@ -576,32 +582,34 @@ const SendLeadsForm = () => {
       ? values.includeIsps.replace(/,/g, '\n')
       : null;
 
-    // Map custom filters
+    // Map custom filters - handle empty/null values
     const customFieldFilter = (values.customFilters || [])
-  .filter(
-    filter =>
-      ALLOWED_CUSTOM_FIELDS.includes(filter.customField) &&
-      filter.customValue &&
-      isNaN(Number(filter.customValue))
-  )
-  .map(filter => ({
-    field_name: filter.customField,
-    field_value: filter.customValue
-  }));
+      .filter(
+        filter =>
+          filter &&
+          filter.customField &&
+          filter.customValue &&
+          isNaN(Number(filter.customValue))
+      )
+      .map(filter => ({
+        field_name: filter.customField,
+        field_value: filter.customValue
+      }));
 
     // Build base payload with all fields
+    // Ensure list_ids is always sent if pickLists has values (required field)
     const payload = {
       order_kind: orderKindMap[values.orderType] || "Lead File",
       order_type_category: orderTypeCategoryMap[values.orderType] || null,
       api_integration_id: apiIntegrationId,
-      is_test_file: values.testPurpose,
-      internal_view_only: values.internalView,
+      is_test_file: values.testPurpose ?? true,
+      internal_view_only: values.internalView ?? true,
       lead_quantity: values.leadsQuantity ? parseInt(values.leadsQuantity, 10) : null,
       price_per_lead: values.pricePerRecord ? parseFloat(values.pricePerRecord) : 0.0,
-      sort_order: sortOrderMap[values.sortOrder] || values.sortOrder,
-      field_selection_type: fieldStrictnessMap[values.fieldStrictness] || values.fieldStrictness,
-      selected_fields: selectedFields,
-      list_ids: listIds.length > 0 ? listIds : null,
+      sort_order: sortOrderMap[values.sortOrder] || values.sortOrder || "Ascending",
+      field_selection_type: fieldStrictnessMap[values.fieldStrictness] || values.fieldStrictness || "Strict",
+      selected_fields: selectedFields.length > 0 ? selectedFields : null,
+      list_ids: listIds.length > 0 ? listIds : null, // Required - validation ensures this is not null
       // Single list_id if only one list selected
       list_id: listIds.length === 1 ? listIds[0] : null,
       ...(values.dedupeDaysBack && values.dedupeDaysBack !== "no-limit"
@@ -700,8 +708,15 @@ const SendLeadsForm = () => {
       return;
     }
 
+    // Validate pickLists is not empty (should be caught by validation schema, but double-check)
+    if (!values.pickLists || values.pickLists.length === 0) {
+      formik.setFieldTouched('pickLists', true);
+      return;
+    }
+
     try {
       const payload = mapFormValuesToApiPayload(values);
+      console.log('Submitting payload:', payload); // Debug log
       const result = await dispatch(createPlatformOrder({ platformId: id, payload })).unwrap();
       
       // Refresh orders list to show the newly created order
@@ -730,7 +745,14 @@ const SendLeadsForm = () => {
       
       // Show more detailed error for enum validation
       if (errorMessage.includes("enum") && errorMessage.includes("order_kind")) {
-        const attemptedValue = orderTypeMap[values.orderType] || values.orderType;
+        const orderKindMap = {
+          leadFile: "Lead File",
+          liveFeed: "Live Feed",
+          priority: "Priority Order",
+          batchPost: "One-Time Batch Post",
+          bidding: "Bidding Order",
+        };
+        const attemptedValue = orderKindMap[values.orderType] || values.orderType;
         errorMessage = `Invalid order type "${attemptedValue}". The API may not support Bidding Orders. Please try: Lead File, Live Feed, Priority Order, or One-Time Batch Post.`;
       }
       
@@ -1073,8 +1095,10 @@ const SendLeadsForm = () => {
             <div className=" py-7">
               <div className="flex flex-col md:flex-row gap-6 px-5">
                 <div className="flex-1">
-                  <label className="text-sm text-primary-dark font-medium mb-2 block">Pick lists</label>
-                  <div className="rounded-custom-lg overflow-hidden bg-neutral-input border border-secondary-lighter h-40">
+                  <label className="text-sm text-primary-dark font-medium mb-2 block">
+                    Pick lists <span className="text-red-500">*</span>
+                  </label>
+                  <div className={`rounded-custom-lg overflow-hidden bg-neutral-input border ${formik.touched.pickLists && formik.errors.pickLists ? 'border-red-500' : 'border-secondary-lighter'} h-40`}>
                     <div className="h-full overflow-y-auto custom-scrollbar">
                       {listsLoading ? (
                         <div className="flex items-center justify-center h-full">
@@ -1100,6 +1124,9 @@ const SendLeadsForm = () => {
                     <button type="button" className="text-primary underline decoration-dashed underline-offset-4 mr-2 cursor-pointer" onClick={handleSelectAllPickLists}>Select All</button> /
                     <button type="button" className="text-primary underline decoration-dashed underline-offset-4 ml-2 cursor-pointer" onClick={handleDeselectAllPickLists}>Deselect All</button>
                   </div>
+                  {formik.touched.pickLists && formik.errors.pickLists && (
+                    <div className="text-xs text-red-500 mt-1">{formik.errors.pickLists}</div>
+                  )}
                 </div>
 
                 <div className="flex-1">
