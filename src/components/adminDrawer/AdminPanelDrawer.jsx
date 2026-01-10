@@ -366,10 +366,10 @@ export default function AdminPanel() {
 
         {/* Bottom buttons */}
         <div className="mt-auto mb-6 px-4 space-y-2">
-          <button className="w-full flex items-center space-x-2 px-3 py-2 hover:bg-[#F5F7F9] rounded-md cursor-pointer">
+          {/* <button className="w-full flex items-center space-x-2 px-3 py-2 hover:bg-[#F5F7F9] rounded-md cursor-pointer">
             <img src={HelpIcon} alt="Help" className="w-5 h-5" />
             <span className="text-[#646E88]">Help</span>
-          </button>
+          </button> */}
           <button
             onClick={() => setShowLogout(true)}
             className="w-full flex items-center space-x-2 px-3 py-2 hover:bg-[#F5F7F9] rounded-md"
@@ -424,7 +424,7 @@ export default function AdminPanel() {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="relative hidden lg:block">
+            {/* <div className="relative hidden lg:block">
               <Search
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                 size={22}
@@ -435,8 +435,8 @@ export default function AdminPanel() {
                 className="pl-10 pr-4 py-[8px] rounded-xl focus:outline-none focus:ring focus:ring-indigo-200"
                 style={{ border: "2px solid #DBDFE9" }}
               />
-            </div>
-            <Bell className="text-gray-600 cursor-pointer" size={20} />
+            </div> */}
+            {/* <Bell className="text-gray-600 cursor-pointer" size={20} /> */}
             <div className="relative inline-block text-left" ref={dropdownRef}>
               <div
                 onClick={() => setIsOpen(!isOpen)}
