@@ -20,10 +20,11 @@ const formatDate = (dateString) => {
 // Helper function to map API response to component format
 const mapOutgoingPostFromApi = (post) => {
     if (!post) return null;
-    
+
     return {
         id: post.id || post.opid || null,
         opid: post.opid || null,
+        post_name: post.post_name || post.postName || post.name || post.title || "N/A",
         platform: post.Platform ? {
             id: post.Platform.id,
             name: post.Platform.platform_name || post.Platform.name || "N/A"
@@ -58,11 +59,11 @@ export const fetchImportedData = createAsyncThunk(
     async (params, { rejectWithValue }) => {
         try {
             const response = await getOutgoingPostsApi(params);
-            
+
             // Handle response structure: { status: "success", data: { outgoing_posts: [...], pagination: {...} } }
             let outgoingPosts = [];
             let paginationData = null;
-            
+
             if (response?.data?.outgoing_posts && Array.isArray(response.data.outgoing_posts)) {
                 // Expected structure: { status: "success", data: { outgoing_posts: [...], pagination: {...} } }
                 outgoingPosts = response.data.outgoing_posts;
@@ -79,10 +80,10 @@ export const fetchImportedData = createAsyncThunk(
                 // Direct array
                 outgoingPosts = response;
             }
-            
+
             // Map posts from API format to component format
             const mappedPosts = outgoingPosts.map(mapOutgoingPostFromApi).filter(post => post !== null);
-            
+
             return {
                 posts: mappedPosts,
                 pagination: paginationData,

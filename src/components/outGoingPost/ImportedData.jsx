@@ -23,16 +23,16 @@ function ImportedData() {
   const [selectedClient, setSelectedClient] = useState("All");
   const [postStatus, setPostStatus] = useState("all");
   const [selected, setSelected] = useState([]);
-  
+
   // State for client/platforms dropdown
   const [clientOptions, setClientOptions] = useState([
-    { label: "Select Client", value: "All" },
+    { label: "Select Platform", value: "All" },
   ]);
   const [clientsLoading, setClientsLoading] = useState(true);
 
   // Sorting state
   const [sortBy, setSortBy] = useState(null);
-  const [sortDir, setSortDir] = useState(null); 
+  const [sortDir, setSortDir] = useState(null);
 
   // Fetch platforms/clients on component mount
   useEffect(() => {
@@ -40,7 +40,7 @@ function ImportedData() {
       try {
         setClientsLoading(true);
         const response = await getPlatformsApi();
-        
+
         // Handle different response structures
         let platformsData = [];
         if (Array.isArray(response)) {
@@ -58,7 +58,7 @@ function ImportedData() {
         }));
 
         setClientOptions([
-          { label: "Select Client", value: "All" },
+          { label: "Select Platform", value: "All" },
           ...formattedClients
         ]);
       } catch (error) {
@@ -100,6 +100,7 @@ function ImportedData() {
   // Headers (used for rendering)
   const headers = [
     "ID",
+    "Post Name",
     "Platform",
     "Created",
     "Integration",
@@ -114,6 +115,7 @@ function ImportedData() {
   // accessor map: only headers present here will be sortable
   const headerToAccessor = {
     ID: (r) => r.id,
+    "Post Name": (r) => r.post_name || r.postName || r.name || r.title || "N/A",
     Platform: (r) => (typeof r.platform === "string" ? r.platform : r.platform?.name || ""),
     Created: (r) => r.created,
     Integration: (r) => r.integration,
@@ -203,7 +205,7 @@ function ImportedData() {
           <div className="relative w-full md:w-72 pb- md:pb-4">
             <input
               type="text"
-              placeholder="Search vendors by name or ID"
+              placeholder="Search posts by name or ID"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full border border-gray-300 bg-neutral-input rounded-xl pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
@@ -213,14 +215,14 @@ function ImportedData() {
 
           {/* Filters (right) */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto flex-wrap pb-4">
-            {/* Client Filter */}
+            {/* Platform Filter */}
             <div className="w-full sm:w-40">
               <CustomTextField
                 isSelect
                 options={clientOptions}
                 value={selectedClient}
                 onChange={(e) => setSelectedClient(e.target.value)}
-                placeholder={clientsLoading ? "Loading clients..." : "Client"}
+                placeholder={clientsLoading ? "Loading platforms..." : "Platform"}
                 size="sm"
                 disabled={clientsLoading}
               />
@@ -346,6 +348,11 @@ function ImportedData() {
                         {row.id}
                       </td>
 
+                      {/* Post Name */}
+                      <td className="px-3 py-6 border border-light text-[#071437] font-medium">
+                        {row.post_name || row.postName || row.name || row.title || "N/A"}
+                      </td>
+
                       {/* Platform (with link) */}
                       <td className="px-3 py-6 border border-light text-primary underline">
                         <Link to={`/platforms/${row.platform?.id || ""}`}>
@@ -403,7 +410,7 @@ function ImportedData() {
                 ) : (
                   <tr>
                     <td
-                      colSpan="11"
+                      colSpan="12"
                       className="text-center py-6 text-gray-500 border border-light"
                     >
                       No records found

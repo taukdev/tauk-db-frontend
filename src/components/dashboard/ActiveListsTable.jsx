@@ -12,61 +12,117 @@ import Pagination from "../common/Pagination";
 import Checkbox from "../common/Checkbox";
 import { getVendorListsApi } from "../../api/vendors";
 import LoadingSpinner from "../common/LoadingSpinner";
+import DatePickerField from "../DatePickerField";
 
-/* Inline LeadCountRangeDropdown (kept as provided) */
-function LeadCountRangeDropdown() {
+/* Inline DateRangeDropdown */
+function DateRangeDropdown({ onDateRangeChange }) {
   const [open, setOpen] = useState(false);
-  const [min, setMin] = useState("");
-  const [max, setMax] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const handleSet = () => {
+    if (onDateRangeChange) {
+      onDateRangeChange({ startDate, endDate });
+    }
+    setOpen(false);
+  };
+
+  const handleClear = () => {
+    setStartDate("");
+    setEndDate("");
+    if (onDateRangeChange) {
+      onDateRangeChange({ startDate: "", endDate: "" });
+    }
+  };
+
+  const formatDisplayDate = (date) => {
+    if (!date) return "Select date";
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
   return (
     <div className="relative">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex justify-between items-center border rounded-custom-md bg-neutral-input text-gray-700 focus:outline-none px-3 py-2 text-sm border-default focus:ring-0 focus:border-[#DBDFE9] cursor-pointer"
+        className="w-full flex justify-between items-center border rounded-custom-md bg-neutral-input text-gray-700 hover:border-primary/30 focus:outline-none px-3 py-2 text-sm border-default focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
       >
-        <span>Lead Count Range</span>
+        <div className="flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span className="text-sm">
+            {startDate || endDate ? (
+              <span className="text-gray-700 font-medium">
+                {startDate ? formatDisplayDate(startDate) : "Start"} - {endDate ? formatDisplayDate(endDate) : "End"}
+              </span>
+            ) : (
+              "Date Range"
+            )}
+          </span>
+        </div>
         <svg
-          width="18"
-          height="18"
+          width="16"
+          height="16"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
           viewBox="0 0 24 24"
-          className={`ml-2 transform transition-transform cursor-pointer ${
-            open ? "rotate-180" : ""
-          }`}
+          className={`transform transition-transform ${open ? "rotate-180" : ""}`}
         >
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
       {open && (
-        <div className="absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-5 flex flex-col gap-3">
-          <div className="text-base font-semibold mb-2">Lead Count Range</div>
-          <div className="flex gap-2 mb-3">
-            <input
-              type="number"
-              min="0"
-              placeholder="Min"
-              value={min}
-              onChange={(e) => setMin(e.target.value)}
-              className="w-1/2 border border-default rounded-custom-md px-3 py-2 text-sm bg-neutral-input focus:outline-none cursor-pointer"
-            />
-            <input
-              type="number"
-              min="0"
-              placeholder="Max"
-              value={max}
-              onChange={(e) => setMax(e.target.value)}
-              className="w-1/2 border border-default rounded-custom-md px-3 py-2 text-sm bg-neutral-input focus:outline-none cursor-pointer"
-            />
+        <div className="absolute z-10 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl p-6 flex flex-col gap-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-gray-100">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <div className="text-lg font-semibold text-gray-800">Select Date Range</div>
           </div>
-          <button
-            className="w-full py-2 rounded-custom-md bg-gradient-primary text-white font-semibold cursor-pointer"
-            onClick={() => setOpen(false)}
-          >
-            Set
-          </button>
+
+          <div className="flex flex-col gap-4">
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider ml-1">Start Date</label>
+              <DatePickerField
+                label="Select Start Date"
+                value={startDate}
+                onChange={(val) => setStartDate(val)}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider ml-1">End Date</label>
+              <DatePickerField
+                label="Select End Date"
+                value={endDate}
+                onChange={(val) => setEndDate(val)}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-3 border-t border-gray-100">
+            <button
+              className="flex-1 py-2.5 rounded-lg bg-gradient-primary text-white font-semibold cursor-pointer hover:opacity-90 transition-opacity shadow-sm"
+              onClick={handleSet}
+            >
+              Apply Filter
+            </button>
+            <button
+              className="px-5 py-2.5 rounded-lg border-2 border-gray-200 text-gray-700 font-semibold cursor-pointer hover:bg-gray-50 hover:border-gray-300 transition-all"
+              onClick={handleClear}
+            >
+              Clear
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -76,13 +132,13 @@ function LeadCountRangeDropdown() {
 const ActiveList = ({ title = "Active Lists" }) => {
   const dispatch = useDispatch();
   const vendorsData = useSelector((state) => state.vendors.vendors || []);
-  
+
   // Ensure vendors is always an array
   const vendors = Array.isArray(vendorsData) ? vendorsData : [];
-  
+
   // State for selected vendor
   const [selectedVendorId, setSelectedVendorId] = useState(null);
-  
+
   // Initialize selected vendor on mount or when vendors change
   useEffect(() => {
     if (vendors.length > 0 && !selectedVendorId) {
@@ -90,7 +146,7 @@ const ActiveList = ({ title = "Active Lists" }) => {
       setSelectedVendorId(vendors[0]?.id);
     }
   }, [vendors, selectedVendorId]);
-  
+
   // Get selected vendor object
   const selectedVendor = vendors.find(v => String(v.id) === String(selectedVendorId)) || vendors[0] || null;
 
@@ -100,6 +156,9 @@ const ActiveList = ({ title = "Active Lists" }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
+
+  // Date range state
+  const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
 
   // Fetch vendor lists for selected vendor (random or first) - fetch all, then filter and paginate client-side
   useEffect(() => {
@@ -155,7 +214,7 @@ const ActiveList = ({ title = "Active Lists" }) => {
     };
 
     fetchVendorLists();
-  }, [selectedVendorId, currentPage, rowsPerPage, selectedVendor?.name]);
+  }, [selectedVendorId, currentPage, rowsPerPage, selectedVendor?.name, dateRange]);
 
   // get vendor by name or fallback to first vendor
   const getVendorById = (vendorName) => {
@@ -190,7 +249,7 @@ const ActiveList = ({ title = "Active Lists" }) => {
 
   // Sorting state
   const [sortBy, setSortBy] = useState(null);
-  const [sortDir, setSortDir] = useState(null); 
+  const [sortDir, setSortDir] = useState(null);
 
   const headers = [
     "List ID",
@@ -326,9 +385,9 @@ const ActiveList = ({ title = "Active Lists" }) => {
               />
             </div>
 
-            {/* Lead Count Range Dropdown */}
+            {/* Date Range Dropdown */}
             <div className="w-full">
-              <LeadCountRangeDropdown />
+              <DateRangeDropdown onDateRangeChange={setDateRange} />
             </div>
 
             {/* Vendor Dropdown */}
@@ -408,13 +467,12 @@ const ActiveList = ({ title = "Active Lists" }) => {
                         <img
                           src={tableHeaderIcon}
                           alt="Sort"
-                          className={`w-4 h-4 transition-transform ${
-                            isActive
-                              ? sortDir === "asc"
-                                ? ""
-                                : ""
-                              : "opacity-60"
-                          }`}
+                          className={`w-4 h-4 transition-transform ${isActive
+                            ? sortDir === "asc"
+                              ? ""
+                              : ""
+                            : "opacity-60"
+                            }`}
                         />
                       </div>
                     </th>
@@ -454,9 +512,8 @@ const ActiveList = ({ title = "Active Lists" }) => {
                   </td>
                   <td className="pl-5 py-6 border border-light text-primary font-medium underline decoration-dashed underline-offset-4">
                     <Link
-                      to={`/vendor/${getVendorById(list.vendorName).id}/list/${
-                        list.id
-                      }`}
+                      to={`/vendor/${getVendorById(list.vendorName).id}/list/${list.id
+                        }`}
                       className="cursor-pointer"
                       onClick={() => handleListClick(list)}
                     >
