@@ -187,29 +187,23 @@ const ListImportState = () => {
                 <h3 className="text-base sm:text-lg font-semibold text-primary-dark mb-3 sm:mb-4">
                   Summary
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   <div className="text-center sm:text-left">
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Total Imports</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1 font-bold uppercase">TOTAL LEADS</p>
                     <p className="text-lg sm:text-xl font-bold text-primary-dark">
-                      {reportData.summary.total_imports || 0}
+                      {reportData.summary.total_leads || reportData.summary.total_records || reportData.summary.total_imports || 0}
                     </p>
                   </div>
                   <div className="text-center sm:text-left">
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Total Records</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1 font-bold uppercase">TOTAL Abandons</p>
                     <p className="text-lg sm:text-xl font-bold text-primary-dark">
-                      {reportData.summary.total_records || 0}
+                      {reportData.summary.total_abandons || reportData.summary.abandons || 0}
                     </p>
                   </div>
                   <div className="text-center sm:text-left">
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">CSV Imports</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1 font-bold">Total Buyers</p>
                     <p className="text-lg sm:text-xl font-bold text-primary-dark">
-                      {reportData.summary.csv_imports || 0}
-                    </p>
-                  </div>
-                  <div className="text-center sm:text-left">
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Webhook Imports</p>
-                    <p className="text-lg sm:text-xl font-bold text-primary-dark">
-                      {reportData.summary.webhook_imports || 0}
+                      {reportData.summary.total_buyers || reportData.summary.buyers || 0}
                     </p>
                   </div>
                 </div>
@@ -242,29 +236,23 @@ const ListImportState = () => {
                       <h4 className="font-semibold text-primary-dark mb-3 text-sm sm:text-base">
                         {list.list_name || `List ${list.list_id}`}
                       </h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-3 gap-3">
                         <div>
-                          <p className="text-xs text-gray-600">Total Imports</p>
+                          <p className="text-[10px] text-gray-600 uppercase font-bold">LEADS</p>
                           <p className="text-sm font-semibold text-primary-dark">
-                            {list.total_imports || 0}
+                            {list.total_leads || list.total_records || list.total_imports || 0}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-600">Total Records</p>
+                          <p className="text-[10px] text-gray-600 uppercase font-bold">Abandons</p>
                           <p className="text-sm font-semibold text-primary-dark">
-                            {list.total_records || 0}
+                            {list.total_abandons || list.abandons || 0}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-600">CSV Imports</p>
+                          <p className="text-[10px] text-gray-600 uppercase font-bold">Buyers</p>
                           <p className="text-sm font-semibold text-primary-dark">
-                            {list.csv_imports || 0}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600">Webhook Imports</p>
-                          <p className="text-sm font-semibold text-primary-dark">
-                            {list.webhook_imports || 0}
+                            {list.total_buyers || list.buyers || 0}
                           </p>
                         </div>
                       </div>
@@ -279,17 +267,14 @@ const ListImportState = () => {
                         <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium">
                           List Name
                         </th>
-                        <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium">
-                          Total Imports
+                        <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-bold uppercase">
+                          TOTAL LEADS
                         </th>
-                        <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium">
-                          Total Records
+                        <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-bold uppercase">
+                          TOTAL Abandons
                         </th>
-                        <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium">
-                          CSV Imports
-                        </th>
-                        <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium">
-                          Webhook Imports
+                        <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-bold uppercase">
+                          Total Buyers
                         </th>
                       </tr>
                     </thead>
@@ -300,16 +285,13 @@ const ListImportState = () => {
                             {list.list_name || `List ${list.list_id}`}
                           </td>
                           <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
-                            {list.total_imports || 0}
+                            {list.total_leads || list.total_records || list.total_imports || 0}
                           </td>
                           <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
-                            {list.total_records || 0}
+                            {list.total_abandons || list.abandons || 0}
                           </td>
                           <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
-                            {list.csv_imports || 0}
-                          </td>
-                          <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
-                            {list.webhook_imports || 0}
+                            {list.total_buyers || list.buyers || 0}
                           </td>
                         </tr>
                       ))}
