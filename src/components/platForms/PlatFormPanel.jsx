@@ -51,10 +51,7 @@ const PlateFormPanel = () => {
   const headers = [
     "Platform ID",
     "Platform Name",
-    "Company",
-    "Payment Term",
     "Entered On",
-    "Referrer",
     "Status",
     "Send Leads",
   ];
@@ -63,10 +60,7 @@ const PlateFormPanel = () => {
   const headerToAccessor = {
     "Platform ID": (p) => p.id,
     "Platform Name": (p) => p.platform_name || p.name,
-    Company: (p) => p.company_name || p.company,
-    "Payment Term": (p) => p.payment_term_name || p.payment_term || p.paymentTerm,
     "Entered On": (p) => p.entered_on || p.enteredOn || p.created_at,
-    Referrer: (p) => p.referrer,
     Status: (p) => p.status,
     // "Send Leads" intentionally not sortable
   };
@@ -293,28 +287,11 @@ const PlateFormPanel = () => {
                         </Link>
                       </td>
 
-                      {/* Company */}
-                      <td className="pl-4 py-6 border border-light text-[#071437] font-medium">
-                        {platform.company_name || platform.company}
-                      </td>
-
-                      {/* Payment Term */}
-                      <td className="pl-4 py-6 border border-light text-[#071437] font-medium">
-                        {platform.payment_term_name ||
-                          platform.payment_term ||
-                          platform.paymentTerm}
-                      </td>
-
                       {/* Entered On */}
                       <td className="pl-4 py-6 border border-light text-[#071437] font-medium">
                         {platform.entered_on ||
                           platform.enteredOn ||
                           platform.created_at}
-                      </td>
-
-                      {/* Referrer */}
-                      <td className="pl-4 py-6 border border-light text-[#071437] font-medium">
-                        {platform.referrer}
                       </td>
 
                       {/* Status */}

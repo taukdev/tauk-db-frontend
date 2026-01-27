@@ -274,7 +274,7 @@ function VendorListAdd() {
             </div>
 
             {/* Fixed Cost Per Lead */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Fixed Cost Per Lead
               </label>
@@ -292,7 +292,7 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* List Vertical */}
             <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
@@ -315,7 +315,7 @@ function VendorListAdd() {
             </div>
 
             {/* Owner's Reshare % */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Owner's Reshare %
               </label>
@@ -335,19 +335,19 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Radio groups for rules, sell times, etc. */}
             {/* How to Sell (Radio Group) */}
-            <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
-              {/* Left Column: Label */}
+            {/* <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
+
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-0 flex items-center">
                 How to Sell
               </label>
 
-              {/* Right Column: Radio + Sell/Times flex */}
+
               <div className="w-full md:w-3/4 flex flex-col md:flex-row items-center justify-between gap-4">
-                {/* Radio Buttons */}
+
                 <div className="flex-1 flex items-center">
                   <CustomTextField
                     name="howToSell"
@@ -365,7 +365,7 @@ function VendorListAdd() {
                   />
                 </div>
 
-                {/* Sell Times Dropdown */}
+
                 <div className="flex items-center gap-2 ">
                   <label className="text-sm text-neutral whitespace-nowrap flex">
                     Sell
@@ -396,9 +396,8 @@ function VendorListAdd() {
                   </label>
                 </div>
               </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            </div> */}
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Sales Rep
               </label>
@@ -418,9 +417,9 @@ function VendorListAdd() {
                   placeholder="...No Sales Rep..."
                 />
               </div>
-            </div>
+            </div> */}
 
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Referrer
               </label>
@@ -440,7 +439,7 @@ function VendorListAdd() {
                   placeholder="...No Referrer..."
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Scrubs and Validations Section */}
             {/* Suppression Scrub */}
@@ -492,7 +491,7 @@ function VendorListAdd() {
             </div>
 
             {/* Level 2 Email Scrub */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Level 2 Email Scrub
               </label>
@@ -513,10 +512,10 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Level 2 Phone Scrub */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Level 2 Phone Scrub
               </label>
@@ -537,10 +536,10 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Level 3 Email Scrub */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Level 3 Email Scrub
               </label>
@@ -561,7 +560,7 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* TCPA Scrub */}
             <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
@@ -585,7 +584,7 @@ function VendorListAdd() {
             </div>
 
             {/* US Address Validation */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 US Address Validation
               </label>
@@ -606,10 +605,10 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Validate IP Address */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Validate IP Address
               </label>
@@ -630,10 +629,10 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* GTO Complete */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 GEO Complete
               </label>
@@ -654,10 +653,10 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Block Bad Words */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Block Bad Words
               </label>
@@ -678,10 +677,10 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Gender Complete */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Gender Complete
               </label>
@@ -702,10 +701,10 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Append Missing Fields */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Append Missing Fields
               </label>
@@ -726,10 +725,10 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Listflex Append Service */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                 Listflex Append Service
               </label>
@@ -750,7 +749,7 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Dedupe Against */}
             <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
@@ -774,7 +773,7 @@ function VendorListAdd() {
             </div>
 
             {/* Dedupe Back (Days) */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral">
                 Dedupe Back (Days)
               </label>
@@ -791,7 +790,7 @@ function VendorListAdd() {
                   disabled={dedupeBacksLoading}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Required Fields */}
             {/* Required Fields */}
@@ -868,7 +867,7 @@ function VendorListAdd() {
             </div>
 
             {/* List Type */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral">
                 List Type
               </label>
@@ -885,10 +884,10 @@ function VendorListAdd() {
                   onChange={formik.handleChange}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Redirect After Import */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral">
                 Redirect After Import
               </label>
@@ -909,7 +908,7 @@ function VendorListAdd() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             <CustomButton
               type="submit"

@@ -929,7 +929,7 @@ const SendLeadsForm = () => {
             </div>
 
             {/* Test Purpose -> boolean radios stored as booleans */}
-            <div className="flex flex-col gap-2 py-5 border-t px-5 border-[#F1F1F4]">
+            {/* <div className="flex flex-col gap-2 py-5 border-t px-5 border-[#F1F1F4]">
               <label className="text-sm text-primary-dark font-medium">
                 Are these leads just for testing purposes?
               </label>
@@ -949,10 +949,10 @@ const SendLeadsForm = () => {
                   error={formik.touched.testPurpose && formik.errors.testPurpose}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Internal View -> boolean radios */}
-            <div className="flex flex-col gap-2 py-5 border-t px-5 border-[#F1F1F4]">
+            {/* <div className="flex flex-col gap-2 py-5 border-t px-5 border-[#F1F1F4]">
               <label className="text-sm text-primary-dark font-medium">
                 Is this order for internal view only?
               </label>
@@ -972,10 +972,10 @@ const SendLeadsForm = () => {
                   error={formik.touched.internalView && formik.errors.internalView}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Leads Quantity */}
-            <div className="flex flex-col gap-2 py-5 border-t px-5 border-[#F1F1F4]">
+            {/* <div className="flex flex-col gap-2 py-5 border-t px-5 border-[#F1F1F4]">
               <label className="text-sm text-primary-dark font-medium">How many leads are you ordering?</label>
 
               <div className="flex flex-wrap md:flex-nowrap gap-2">
@@ -1007,10 +1007,10 @@ const SendLeadsForm = () => {
               </div>
 
               <p className="text-xs text-gray-400">leave quantity empty to get as many leads as there are available</p>
-            </div>
+            </div> */}
 
             {/* Sort Order -> using CustomTextField radio */}
-            <div className="flex flex-col gap-2 py-5 border-t px-5 border-[#F1F1F4]">
+            {/* <div className="flex flex-col gap-2 py-5 border-t px-5 border-[#F1F1F4]">
               <label className="text-sm text-primary-dark font-medium">How do you want your leads sorted?</label>
               <div className="flex flex-col gap-2">
                 <CustomTextField
@@ -1026,7 +1026,7 @@ const SendLeadsForm = () => {
                   error={formik.touched.sortOrder && formik.errors.sortOrder}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Pick lead fields... USING Checkbox component */}
             <div className="flex flex-col gap-2 py-5 border-t px-5 border-[#F1F1F4]">
@@ -1198,7 +1198,7 @@ const SendLeadsForm = () => {
                 />
               </div>
             </div>
-
+{/* 
             <div className="border-b px-5 border-light py-7">
               <label className="text-[13px] text-primary-dark font-medium block mb-4">How many days back do you want to dedupe?</label>
 
@@ -1213,7 +1213,7 @@ const SendLeadsForm = () => {
                         </button>
                       </div>
 
-                      {/* Sections content (only some expanded sections shown) */}
+        
                       {expanded === section && section === "Lead Validation" && (
                         <div className="px-3 py-2">
                           <div className="flex items-center gap-2 text-sm text-neutral">
@@ -1440,10 +1440,10 @@ const SendLeadsForm = () => {
                   ))}
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Preview only OR Place order */}
-            <div className=" px-5  py-2">
+            {/* <div className=" px-5  py-2">
               <label className="text-sm text-neutral font-medium mb-2 block">Preview only OR Place order</label>
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -1456,7 +1456,7 @@ const SendLeadsForm = () => {
                   labelClassName="text-sm"
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Submit Button */}
             <div className="flex justify-end mr-6 mt-0">

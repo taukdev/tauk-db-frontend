@@ -33,10 +33,7 @@ const VendorList = () => {
   const headers = [
     "Vendor ID",
     "Vendor Name",
-    "Company",
     "Entered On",
-    "# of Lists",
-    "Referrer",
     "Status",
   ];
 
@@ -218,16 +215,7 @@ const VendorList = () => {
                     </td>
 
                     <td className="pl-5 py-6 border border-light font-medium">
-                      {vendor.company}
-                    </td>
-                    <td className="pl-5 py-6 border border-light font-medium">
                       {vendor.enteredOn}
-                    </td>
-                    <td className="pl-5 py-6 border border-light font-medium">
-                      {vendor.lists}
-                    </td>
-                    <td className="pl-5 py-6 border border-light font-medium">
-                      {vendor.referrer}
                     </td>
 
                     {/* Status */}

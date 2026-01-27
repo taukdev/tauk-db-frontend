@@ -180,14 +180,14 @@ function VendorDetail() {
         <div className="lg:col-span-2">
           <div className="sticky top-0">
             <VendorListing vendorId={vendor?.id} vendorName={displayName} />
-            <VendorPayment />
+            {/* <VendorPayment /> */}
           </div>
         </div>
 
         {/* Right Sidebar (Profile + Notes + Add Note) */}
         <div className="flex flex-col gap-6">
-          <VendorProfile vendor={vendor} />
-          <VendorNotes vendorId={vendor?.id} />
+          {/* <VendorProfile vendor={vendor} /> */}
+          {/* <VendorNotes vendorId={vendor?.id} /> */}
         </div>
       </div>
     </div>

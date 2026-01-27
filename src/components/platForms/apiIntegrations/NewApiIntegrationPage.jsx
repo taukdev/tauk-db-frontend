@@ -12,7 +12,7 @@ import { setBreadcrumbs } from "../../../features/breadcrumb/breadcrumbSlice";
 
 const apiTypes = [
   { label: "Regular API", value: "Regular API" },
-  { label: "Ping/Post", value: "Ping/Post" },
+  // { label: "Ping/Post", value: "Ping/Post" },
 ];
 const urlEncodeOptions = [
   { label: "Yes", value: "Yes" },
@@ -32,7 +32,7 @@ const validationSchema = Yup.object({
     .min(1, "Minimum 1 second")
     .max(60, "Maximum 60 seconds")
     .required("Timeout is required"),
-  dateFormat: Yup.string().required("Date format is required"),
+  // dateFormat: Yup.string().required("Date format is required"),
   urlEncode: Yup.string().required("URL encode is required"),
   requestType: Yup.string().required("Request type is required"),
   successfulResponse: Yup.string(),
@@ -272,7 +272,7 @@ function NewApiIntegrationPage() {
                 </div>
               </div>
 
-              <div className='mx-6'>
+              {/* <div className='mx-6'>
                 <CustomTextField
                   label="Date Format"
                   name="dateFormat"
@@ -282,7 +282,7 @@ function NewApiIntegrationPage() {
                   onBlur={formik.handleBlur}
                   error={formik.touched.dateFormat ? formik.errors.dateFormat : ''}
                 />
-              </div>
+              </div> */}
 
               <div className='mx-6'>
                 <CustomTextField

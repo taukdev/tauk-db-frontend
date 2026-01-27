@@ -142,7 +142,7 @@ export default function PlatFormDetail() {
         </div>
 
         <div className="flex flex-col gap-4 md:gap-6 order-2">
-          <PlatformProfile platform={platform} />
+          {/* <PlatformProfile platform={platform} /> */}
           <PlatformNotes platformId={platform.id} />
           <AddNoteForm platformId={platform.id} />
         </div>

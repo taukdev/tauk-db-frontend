@@ -248,7 +248,7 @@ const AddVendor = () => {
                             </div>
 
                             {/* Company Name */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     Company Name
                                 </label>
@@ -263,7 +263,7 @@ const AddVendor = () => {
                                         error={formik.touched.companyName ? formik.errors.companyName : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
 
                             {/* Vendor Type */}
@@ -286,7 +286,7 @@ const AddVendor = () => {
                             </div>
 
                             {/* Payment Term */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     Payment Term
                                 </label>
@@ -302,10 +302,10 @@ const AddVendor = () => {
                                         error={formik.touched.paymentTerm ? formik.errors.paymentTerm : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Phone Number */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     Phone Number
                                 </label>
@@ -320,10 +320,10 @@ const AddVendor = () => {
                                         error={formik.touched.phoneNumber ? formik.errors.phoneNumber : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Fax Number */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     Fax Number
                                 </label>
@@ -338,10 +338,10 @@ const AddVendor = () => {
                                         error={formik.touched.faxNumber ? formik.errors.faxNumber : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Email */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     Email
                                 </label>
@@ -356,10 +356,10 @@ const AddVendor = () => {
                                         error={formik.touched.email ? formik.errors.email : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Address */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     Address
                                 </label>
@@ -374,9 +374,9 @@ const AddVendor = () => {
                                         error={formik.touched.address ? formik.errors.address : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
-                            {/* City */}
+                            {/* City
                             <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     City
@@ -392,10 +392,10 @@ const AddVendor = () => {
                                         error={formik.touched.city ? formik.errors.city : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Country */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     Country
                                 </label>
@@ -425,10 +425,10 @@ const AddVendor = () => {
                                         error={formik.touched.country ? formik.errors.country : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* State */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     State
                                 </label>
@@ -445,10 +445,10 @@ const AddVendor = () => {
                                         disabled={!selectedCountryId || statesLoading}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Zip */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     Zip
                                 </label>
@@ -463,10 +463,10 @@ const AddVendor = () => {
                                         error={formik.touched.zip ? formik.errors.zip : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Other Contact Info */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     Other Contact Info
                                 </label>
@@ -484,10 +484,10 @@ const AddVendor = () => {
                                     />
                                     <div className="text-xs text-gray-500 mb-2">Skype, WhatsApp, Viber, etc.</div>
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Referrer */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     Referrer
                                 </label>
@@ -502,10 +502,10 @@ const AddVendor = () => {
                                         error={formik.touched.referrer ? formik.errors.referrer : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Allow Recording Upload */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
                                     Allow Recording Upload
                                 </label>
@@ -518,16 +518,16 @@ const AddVendor = () => {
                                         onBlur={formik.handleBlur}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-6 mb-8">
-                                {/* Left Column - Info Text */}
-                                <div className="flex gap-2 items-start md:items-center w-full md:w-[70%] lg:w-auto text-[11.5px] text-gray-600">
+                    
+                                {/* <div className="flex gap-2 items-start md:items-center w-full md:w-[70%] lg:w-auto text-[11.5px] text-gray-600">
                                     <img src={DangerCircleIcon} alt="Danger Icon" className="w-4 h-4 mt-0.5 md:mt-0" />
                                     <p className="text-justify">
                                         The system will automatically generate a Username and Password for this vendor. You will see them on the next page.
                                     </p>
-                                </div>
+                                </div> */}
 
                                 {/* Right Column - Submit Button */}
                                 <div className="w-full md:w-auto">
