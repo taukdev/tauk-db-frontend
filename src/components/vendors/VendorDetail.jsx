@@ -175,21 +175,12 @@ function VendorDetail() {
       </div>
 
       {/* Layout - Orders + Profile/Notes */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Orders Section (2/3 width) */}
-        <div className="lg:col-span-2">
-          <div className="sticky top-0">
-            <VendorListing vendorId={vendor?.id} vendorName={displayName} />
-            {/* <VendorPayment /> */}
-          </div>
-        </div>
-
-        {/* Right Sidebar (Profile + Notes + Add Note) */}
-        <div className="flex flex-col gap-6">
-          {/* <VendorProfile vendor={vendor} /> */}
-          {/* <VendorNotes vendorId={vendor?.id} /> */}
+      <div className="grid grid-cols-1 gap-6">
+        <div className="lg:col-span-3">
+          <VendorListing vendorId={vendor?.id} vendorName={displayName} />
         </div>
       </div>
+
     </div>
   );
 }
