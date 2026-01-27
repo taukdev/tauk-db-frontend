@@ -832,7 +832,7 @@ function VendorListAdd() {
             </div>
 
             {/* Allowed Countries - Multiple Select using Checkboxes */}
-            <div className="flex flex-col md:flex-row items-start md:items-start gap-2 md:gap-4">
+            {/* <div className="flex flex-col md:flex-row items-start md:items-start gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral cursor-default">
                 Allowed Countries
               </label>
@@ -860,7 +860,7 @@ function VendorListAdd() {
                   <div className="text-sm text-gray-500">No countries available</div>
                 )}
               </div>
-            </div>
+            </div> */}
 
             {/* List Type */}
             {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">

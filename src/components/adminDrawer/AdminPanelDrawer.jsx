@@ -90,7 +90,7 @@ const sidebarItems = [
     submenu: [
       { name: "List Import Stats", link: "/report/list-import-status" },
       { name: "Lead Delivery Report", link: "/report/lead-delivery-report" },
-      { name: "Scrub Report", link: "/report/scrub-report" },
+      // { name: "Scrub Report", link: "/report/scrub-report" },
       { name: "Send Report", link: "/report/send-report" },
     ],
     Link: "/report",

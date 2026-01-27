@@ -78,7 +78,7 @@ function VendorLists({ vendorName }) {
             : item.created_at
               ? new Date(item.created_at).toLocaleDateString()
               : "-"),
-        revshare: item.revshare || item.owner_revshare_percent || "0",
+        // revshare: item.revshare || item.owner_revshare_percent || "0",
         vertical: item.vertical || item.list_vertical || "-",
         records: item.records || item.sell_times || 0,
         status: item.list_status
@@ -143,7 +143,6 @@ function VendorLists({ vendorName }) {
     "List ID",
     "List Name",
     "Date Added",
-    "Revshare %",
     "Vertical",
     "# of Records",
     "Status",
@@ -155,10 +154,11 @@ function VendorLists({ vendorName }) {
     "List ID": (i) => i.id,
     "List Name": (i) => i.listName,
     "Date Added": (i) => i.dateAdded,
-    "Revshare %": (i) => i.revshare,
     Vertical: (i) => i.vertical,
     "# of Records": (i) => i.records,
     Status: (i) => i.status,
+    API: (i) => i.api || "",
+    "Upload Data": (i) => i.uploadData || "",
   };
 
   const toggleSort = (head) => {
@@ -286,7 +286,6 @@ function VendorLists({ vendorName }) {
                     </Link>
                   </td>
                   <td className="px-3 py-4">{item.dateAdded}</td>
-                  <td className="px-3 py-4">{item.revshare}</td>
                   <td className="px-3 py-4">{item.vertical}</td>
                   <td className="px-3 py-4">{item.records}</td>
                   <td className="px-3 py-4">
