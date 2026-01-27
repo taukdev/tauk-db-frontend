@@ -20,20 +20,7 @@ const validationSchema = Yup.object({
     name: Yup.string().required("Platform name is required"),
     company: Yup.string().required("Company name is required"),
     platformType: Yup.string().required("Platform type is required"),
-    paymentTerm: Yup.string().required("Payment term is required"),
-    email: Yup.string().email("Invalid email").required("Email is required"),
-    phone: Yup.string()
-        .required('Phone number is required')
-        .matches(
-            /^(\+?\d{1,3}[- ]?)?\d{10}$/,
-            'Invalid phone number'
-        ),
-    fax: Yup.string().matches(/^[0-9+\-() ]*$/, "Invalid fax number"),
-    address: Yup.string().required("Address is required"),
-    city: Yup.string().required("City is required"),
-    state: Yup.string().required("State is required"),
-    zip: Yup.string().required("Zip is required"),
-    country: Yup.string().required("Country is required"),
+    referrerPercent: Yup.number().typeError("Must be a number"),
 });
 
 const AddPlatform = () => {
@@ -80,7 +67,6 @@ const AddPlatform = () => {
             name: "",
             company: "",
             platformType: "",
-            paymentTerm: "",
             phone: "",
             fax: "",
             email: "",
@@ -104,23 +90,7 @@ const AddPlatform = () => {
                 platform_name: values.name,
                 company_name: values.company,
                 platform_type: parseInt(values.platformType),
-                payment_term: parseInt(values.paymentTerm),
-                phone_number: values.phone,
-                fax_number: values.fax,
-                email: values.email,
-                address: values.address,
-                city: values.city,
-                state: parseInt(values.state),
-                zip: values.zip,
-                country: parseInt(values.country),
-                other_contact_info: values.otherContactInfo,
-                lead_return_cutoff: parseInt(values.leadReturnCutoff),
-                referrer: values.referrer,
                 referrer_percent: parseFloat(values.referrerPercent),
-                sales_rep: values.salesRep,
-                since_year: values.sinceYear,
-                base_offline_url: values.baseOfflineUrl,
-                internal_view_only: values.internalViewOnly
             };
 
             try {
@@ -222,7 +192,7 @@ const AddPlatform = () => {
                             </div>
 
                             {/* Payment Term */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Payment Term
                                 </label>
@@ -238,10 +208,10 @@ const AddPlatform = () => {
                                         error={formik.touched.paymentTerm ? formik.errors.paymentTerm : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Phone Number */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Phone Number
                                 </label>
@@ -256,10 +226,10 @@ const AddPlatform = () => {
                                         error={formik.touched.phone ? formik.errors.phone : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Fax Number */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Fax Number
                                 </label>
@@ -274,10 +244,10 @@ const AddPlatform = () => {
                                         error={formik.touched.fax ? formik.errors.fax : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Email */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Email
                                 </label>
@@ -292,10 +262,10 @@ const AddPlatform = () => {
                                         error={formik.touched.email ? formik.errors.email : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Address */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Address
                                 </label>
@@ -310,10 +280,10 @@ const AddPlatform = () => {
                                         error={formik.touched.address ? formik.errors.address : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* City */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     City
                                 </label>
@@ -328,10 +298,10 @@ const AddPlatform = () => {
                                         error={formik.touched.city ? formik.errors.city : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Country */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Country
                                 </label>
@@ -347,10 +317,10 @@ const AddPlatform = () => {
                                         error={formik.touched.country ? formik.errors.country : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* State */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     State
                                 </label>
@@ -366,9 +336,9 @@ const AddPlatform = () => {
                                         error={formik.touched.state ? formik.errors.state : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
-                            {/* Zip */}
+                            {/* 
                             <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Zip
@@ -384,10 +354,10 @@ const AddPlatform = () => {
                                         error={formik.touched.zip ? formik.errors.zip : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Other Contact Info (textarea) */}
-                            <div className="flex flex-col md:flex-row items-start md:items-start gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-start gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Other Contact Info
                                 </label>
@@ -408,10 +378,10 @@ const AddPlatform = () => {
                                         Skype, WhatsApp, Viber, etc.
                                     </p>
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Lead Return Cutoff */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Lead Return Cutoff
                                 </label>
@@ -429,10 +399,10 @@ const AddPlatform = () => {
                                         }
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Referrer */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Referrer
                                 </label>
@@ -447,10 +417,10 @@ const AddPlatform = () => {
                                         error={formik.touched.referrer ? formik.errors.referrer : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Referrer Percent */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Referrer Percent
                                 </label>
@@ -468,10 +438,10 @@ const AddPlatform = () => {
                                         }
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Sales Rep */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Sales Rep
                                 </label>
@@ -486,16 +456,16 @@ const AddPlatform = () => {
                                         error={formik.touched.salesRep ? formik.errors.salesRep : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-6 mb-8">
                                 {/* Left Column - Info Text */}
-                                <div className="flex gap-2 items-start md:items-center w-full md:w-[70%] lg:w-auto text-[11.5px] text-gray-600">
+                                {/* <div className="flex gap-2 items-start md:items-center w-full md:w-[70%] lg:w-auto text-[11.5px] text-gray-600">
                                     <img src={DangerCircleIcon} alt="Danger Icon" className="w-4 h-4 mt-0.5 md:mt-0" />
                                     <p className="text-justify text-xs">
                                         The system will automatically generate a Username and Password for this Platform. You will see them on the next page.
                                     </p>
-                                </div>
+                                </div> */}
 
                                 {/* Right Column - Submit Button */}
                                 <div className="w-full md:w-auto">

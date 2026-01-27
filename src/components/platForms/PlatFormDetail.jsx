@@ -136,17 +136,12 @@ export default function PlatFormDetail() {
       </div>
 
       {/* Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-3 xs:gap-4 md:gap-6">
-        <div className="xl:col-span-2 order-1 self-start xl:sticky top-0">
-          <PlatformOrders platformId={platform.id} />
-        </div>
+  <div className="grid grid-cols-1 gap-3 xs:gap-4 md:gap-6">
+  <div className="col-span-1 w-full">
+    <PlatformOrders platformId={platform.id} />
+  </div>
+</div>
 
-        <div className="flex flex-col gap-4 md:gap-6 order-2">
-          {/* <PlatformProfile platform={platform} /> */}
-          <PlatformNotes platformId={platform.id} />
-          <AddNoteForm platformId={platform.id} />
-        </div>
-      </div>
     </div>
   );
 }

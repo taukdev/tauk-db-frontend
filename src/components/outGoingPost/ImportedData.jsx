@@ -100,14 +100,9 @@ function ImportedData() {
   // Headers (used for rendering)
   const headers = [
     "ID",
-    "Post Name",
     "Platform",
     "Created",
     "Integration",
-    "Posted",
-    "Posted Today",
-    "Order Cap",
-    "Daily Cap",
     "Status",
     "Modify",
   ];
@@ -115,14 +110,9 @@ function ImportedData() {
   // accessor map: only headers present here will be sortable
   const headerToAccessor = {
     ID: (r) => r.id,
-    "Post Name": (r) => r.post_name || r.postName || r.name || r.title || "N/A",
     Platform: (r) => (typeof r.platform === "string" ? r.platform : r.platform?.name || ""),
     Created: (r) => r.created,
     Integration: (r) => r.integration,
-    Posted: (r) => r.posted,
-    "Posted Today": (r) => r.postedToday,
-    "Order Cap": (r) => r.orderCap,
-    "Daily Cap": (r) => r.dailyCap,
     Status: (r) => r.status,
     // Modify is intentionally not sortable
   };
@@ -348,11 +338,6 @@ function ImportedData() {
                         {row.id}
                       </td>
 
-                      {/* Post Name */}
-                      <td className="px-3 py-6 border border-light text-[#071437] font-medium">
-                        {row.post_name || row.postName || row.name || row.title || "N/A"}
-                      </td>
-
                       {/* Platform (with link) */}
                       <td className="px-3 py-6 border border-light text-primary underline">
                         <Link to={`/platforms/${row.platform?.id || ""}`}>
@@ -368,26 +353,6 @@ function ImportedData() {
                       {/* Integration */}
                       <td className="px-3 py-6 border border-light text-[#071437] font-medium">
                         {row.integration}
-                      </td>
-
-                      {/* Posted */}
-                      <td className="pl-5 py-6 border border-light text-[#071437] font-medium">
-                        {row.posted}
-                      </td>
-
-                      {/* Posted Today */}
-                      <td className="px-3 py-6 border border-light text-[#071437] font-medium">
-                        {row.postedToday}
-                      </td>
-
-                      {/* Order Cap */}
-                      <td className="px-3 py-6 border border-light text-[#071437] font-medium">
-                        {row.orderCap}
-                      </td>
-
-                      {/* Daily Cap */}
-                      <td className="px-3 py-6 border border-light text-[#071437] font-medium">
-                        {row.dailyCap}
                       </td>
 
                       {/* Status pill */}
@@ -410,7 +375,7 @@ function ImportedData() {
                 ) : (
                   <tr>
                     <td
-                      colSpan="12"
+                      colSpan="7"
                       className="text-center py-6 text-gray-500 border border-light"
                     >
                       No records found
