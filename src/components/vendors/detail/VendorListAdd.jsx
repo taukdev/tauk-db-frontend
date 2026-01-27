@@ -39,19 +39,8 @@ const requiredFields = [
 
 const validationSchema = Yup.object({
   listName: Yup.string().required("List name is required"),
-  costPerLead: Yup.number()
-    .typeError("Must be a number")
-    .required("Cost per lead is required"),
   listVertical: Yup.string().required("List vertical is required"),
-  ownerReshare: Yup.number()
-    .typeError("Must be a number")
-    .required("Owner reshare % is required"),
-  salesRep: Yup.string(),
-  referrer: Yup.string(),
   listStatus: Yup.string().required("List status is required"),
-  dedupeBack: Yup.number()
-    .typeError("Must be a number")
-    .required("Dedupe back is required"),
 });
 
 
@@ -98,6 +87,9 @@ function VendorListAdd() {
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting, setFieldError }) => {
+      console.log("🚀 Form submission started!");
+      console.log("Form values:", values);
+      console.log("Validation errors:", formik.errors);
       try {
         // Map form values to API payload format
         const convertToInt = (val) => {
@@ -173,12 +165,16 @@ function VendorListAdd() {
           redirect_after_import: values.redirectAfterImport || false,
         };
 
+        console.log("📤 API Payload:", payload);
+
         // Call API
         await createListApi(payload);
 
         // Navigate back to vendor detail page on success
         navigate(`/vendor/${vendorId}`);
       } catch (error) {
+        console.error("❌ Form submission error:", error);
+        console.error("Error details:", error?.response?.data || error?.data);
         const errorMessage = error?.data?.message || error?.message || "Failed to create list. Please try again.";
         setFieldError('listName', errorMessage);
 
