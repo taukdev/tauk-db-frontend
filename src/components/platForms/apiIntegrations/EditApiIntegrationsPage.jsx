@@ -362,26 +362,8 @@ function EditApiIntegrations() {
                                         formik.touched.fieldMapping ? formik.errors.fieldMapping : ""
                                     }
                                 />
-                                <div className="text-sm text-gray-500">
-                                    Read about field mapping{" "}
-                                    <a
-                                        href="#"
-                                        className="border-b border-primary border-dashed rounded cursor-pointer text-primary text-sm"
-                                    >
-                                        here
-                                    </a>
-                                </div>
                             </div>
 
-                            {/* Hide Advanced */}
-                            <div className="mx-6">
-                                <button
-                                    type="button"
-                                    className="border-b border-primary border-dashed rounded cursor-pointer text-primary text-sm"
-                                >
-                                    Hide Advanced Options
-                                </button>
-                            </div>
 
                             {/* Save Button */}
                             <CustomButton
