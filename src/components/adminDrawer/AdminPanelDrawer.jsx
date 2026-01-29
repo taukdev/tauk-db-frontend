@@ -91,21 +91,21 @@ const sidebarItems = [
       { name: "List Import Stats", link: "/report/list-import-status" },
       { name: "Lead Delivery Report", link: "/report/lead-delivery-report" },
       // { name: "Scrub Report", link: "/report/scrub-report" },
-      { name: "Send Report", link: "/report/send-report" },
+      // { name: "Send Report", link: "/report/send-report" },
     ],
     Link: "/report",
     keywords: ["reports", "report", "list-import-stats"],
   },
-  {
-    name: "Search Records",
-    type: "tab",
-    icon: <img src={MagniferIcon} alt="Search records" className="w-5 h-5" />,
-    boldIcon: (
-      <img src={MagniferBoldIcon} alt="Search records" className="w-5 h-5" />
-    ),
-    Link: "/search-records",
-    keywords: ["search-records", "search-record", "search"],
-  },
+  // {
+  //   name: "Search Records",
+  //   type: "tab",
+  //   icon: <img src={MagniferIcon} alt="Search records" className="w-5 h-5" />,
+  //   boldIcon: (
+  //     <img src={MagniferBoldIcon} alt="Search records" className="w-5 h-5" />
+  //   ),
+  //   Link: "/search-records",
+  //   keywords: ["search-records", "search-record", "search"],
+  // },
   {
     name: "Active Campaigns",
     type: "tab",

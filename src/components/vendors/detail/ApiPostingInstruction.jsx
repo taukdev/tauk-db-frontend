@@ -157,12 +157,12 @@ export default function ApiPostingInstruction() {
                                     </div>
                                 </div>
                                 {/* Action Button */}
-                                <div className="flex flex-wrap md:flex-nowrap gap-2 sm:justify-end">
+                                {/* <div className="flex flex-wrap md:flex-nowrap gap-2 sm:justify-end">
                                     <button className="w-auto px-[8px] py-[4px] flex items-center justify-center rounded border border-default bg-white hover:bg-gray-100 text-[#6B7280]">
                                         <img src={BookApiICon} alt="Book Icon" className="w-4 h-4 mr-1" />
                                         <span className="text-xs cursor-pointer">Get API Documentation</span>
                                     </button>
-                                </div>
+                                </div> */}
                             </div>
                             {/* API URL / Notes */}
                             {item.apiUrl && (
@@ -183,11 +183,11 @@ export default function ApiPostingInstruction() {
                                 </div>
                             )}
                             {/* Optional: Custom Fields */}
-                            <div className="mt-3 flex items-center gap-2 text-sm text-secondary justify-start sm:justify-end">
+                            {/* <div className="mt-3 flex items-center gap-2 text-sm text-secondary justify-start sm:justify-end">
                                 <span className="text-primary cursor-pointer border-b border-dashed">
                                     Add custom fields
                                 </span>
-                            </div>
+                            </div> */}
                         </div>
                     ))
                 ) : (

@@ -151,6 +151,24 @@ const PlateFormPanel = () => {
     );
   };
 
+  // Date formatting function
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString; // Return original if invalid date
+      
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+    } catch (error) {
+      return dateString; // Return original if error
+    }
+  };
+
   // Status style mapping
   const statusStyles = {
     Active: "bg-green-100 text-green-600 border border-[#17C65333]",
@@ -289,9 +307,9 @@ const PlateFormPanel = () => {
 
                       {/* Entered On */}
                       <td className="pl-4 py-6 border border-light text-[#071437] font-medium">
-                        {platform.entered_on ||
+                        {formatDate(platform.entered_on ||
                           platform.enteredOn ||
-                          platform.created_at}
+                          platform.created_at)}
                       </td>
 
                       {/* Status */}

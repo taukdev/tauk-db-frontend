@@ -178,7 +178,7 @@ const VendorDropdown = ({
               />
             </div>
           </div>
-          <button
+          {/* <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
@@ -190,7 +190,7 @@ const VendorDropdown = ({
           >
             <Plus className="w-4 h-4" color="#1b84ff" />
             <span className="text-primary font-medium">Add New Vendor</span>
-          </button>
+          </button> */}
         </div>
 
         {/* Add Form at Top */}
@@ -267,7 +267,7 @@ const VendorDropdown = ({
                       >
                         {vendor.vendor_name || vendor.name}
                       </span>
-                      <div
+                      {/* <div
                         className="flex items-center gap-2"
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -291,7 +291,7 @@ const VendorDropdown = ({
                         >
                           <X className="w-4 h-4 text-gray-500" />
                         </button>
-                      </div>
+                      </div> */}
                     </div>
                   ) : (
                     <div className="p-4">
