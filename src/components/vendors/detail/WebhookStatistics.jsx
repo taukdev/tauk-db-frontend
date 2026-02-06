@@ -101,92 +101,108 @@ const WebhookStatistics = () => {
                 </div>
             </div>
 
-            {/* Main Table */}
-            <div className="bg-white rounded-custom-lg border border-secondary-lighter shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-neutral-input border-b border-secondary-lighter">
-                            <tr>
-                                <th className="px-5 py-4 font-semibold text-secondary text-xs uppercase tracking-wider w-10"></th>
-                                <th className="px-5 py-4 font-semibold text-secondary text-xs uppercase tracking-wider">Webhook URL</th>
-                                <th className="px-5 py-4 font-semibold text-secondary text-xs uppercase tracking-wider">Date & Time</th>
-                                <th className="px-5 py-4 font-semibold text-secondary text-xs uppercase tracking-wider text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-secondary-lighter">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={4} className="px-5 py-12 text-center">
-                                        <LoadingSpinner text="Loading webhook data..." size="md" />
-                                    </td>
-                                </tr>
-                            ) : error ? (
-                                <tr>
-                                    <td colSpan={4} className="px-5 py-12 text-center text-red-500">
-                                        {error}
-                                    </td>
-                                </tr>
-                            ) : filteredHistory.length === 0 ? (
-                                <tr>
-                                    <td colSpan={4} className="px-5 py-12 text-center text-gray-500 italic">
-                                        No webhook history found.
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredHistory.map((item) => (
-                                    <React.Fragment key={item._id}>
-                                        <tr className={`hover:bg-gray-50 transition-colors ${expandedRows.has(item._id) ? 'bg-primary/5' : ''}`}>
-                                            <td className="px-5 py-4">
-                                                <button
-                                                    onClick={() => toggleRow(item._id)}
-                                                    className="p-1 hover:bg-gray-200 rounded transition-colors"
-                                                >
-                                                    {expandedRows.has(item._id) ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                                </button>
-                                            </td>
-                                            <td className="px-5 py-4 text-primary-dark font-medium break-all">{item.webhook_url || '-'}</td>
-                                            <td className="px-5 py-4 text-gray-600 whitespace-nowrap">
-                                                {new Date(item.created_at).toLocaleDateString()} at {new Date(item.created_at).toLocaleTimeString()}
-                                            </td>
-                                            <td className="px-5 py-4 text-right">
-                                                <button
-                                                    onClick={() => toggleRow(item._id)}
-                                                    className="inline-flex items-center gap-1.5 text-primary hover:text-primary-dark font-semibold text-xs transition-colors whitespace-nowrap"
-                                                >
-                                                    <Eye size={14} /> {expandedRows.has(item._id) ? 'Hide Data' : 'View Payload'}
-                                                </button>
-                                            </td>
-                                        </tr>
+            {/* Main Content */}
+            <div className="space-y-4">
+                {loading ? (
+                    <div className="bg-white rounded-xl border border-secondary-lighter p-12 text-center">
+                        <LoadingSpinner text="Loading webhook data..." size="md" />
+                    </div>
+                ) : error ? (
+                    <div className="bg-white rounded-xl border border-red-200 p-12 text-center text-red-500">
+                        {error}
+                    </div>
+                ) : filteredHistory.length === 0 ? (
+                    <div className="bg-white rounded-xl border border-secondary-lighter p-12 text-center text-gray-500 italic">
+                        No webhook history found.
+                    </div>
+                ) : (
+                    filteredHistory.map((item) => (
+                        <div
+                            key={item._id}
+                            className={`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${expandedRows.has(item._id)
+                                    ? 'border-primary shadow-md ring-1 ring-primary/10'
+                                    : 'border-secondary-lighter hover:border-primary/40 shadow-sm'
+                                }`}
+                        >
+                            {/* Card Header */}
+                            <div
+                                className="px-5 py-4 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4"
+                                onClick={() => toggleRow(item._id)}
+                            >
+                                <div className="flex items-start gap-3 flex-1 min-w-0">
+                                    <div className={`mt-1 p-1 rounded transition-colors ${expandedRows.has(item._id) ? 'bg-primary/10 text-primary' : 'text-gray-400'}`}>
+                                        {expandedRows.has(item._id) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="text-secondary-dark text-[10px] font-bold uppercase tracking-wider mb-1">Webhook URL</div>
+                                        <div className="text-primary-dark font-medium break-all text-sm md:text-base">
+                                            {item.webhook_url || '-'}
+                                        </div>
+                                    </div>
+                                </div>
 
-                                        {/* Expanded Row for Payload */}
-                                        {expandedRows.has(item._id) && (
-                                            <tr className="bg-gray-50 shadow-inner">
-                                                <td colSpan={4} className="px-8 md:px-12 py-6 border-l-4 border-primary">
-                                                    <div className="space-y-4">
-                                                        <div className="flex items-center justify-between">
-                                                            <h4 className="text-sm font-bold text-primary-dark uppercase tracking-tight">Payload Details</h4>
-                                                            <div className="flex gap-2">
-                                                                <span className="text-[10px] text-gray-400 font-mono">ID: {item._id}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="bg-[#1e293b] rounded-xl p-5 shadow-lg max-h-[400px] overflow-auto border border-gray-700 custom-scrollbar">
-                                                            <pre className="text-xs text-blue-200 font-mono whitespace-pre-wrap leading-relaxed">
-                                                                {JSON.stringify(item.payload, null, 2)}
-                                                            </pre>
-                                                        </div>
-                                                        <div className="text-[10px] text-gray-500 text-right italic font-medium">
-                                                            Processing Status: <span className="uppercase">{item.processing_status}</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </React.Fragment>
-                                ))
+                                <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 md:gap-1">
+                                    <div className="text-secondary-dark text-[10px] font-bold uppercase tracking-wider md:hidden">Date & Time</div>
+                                    <div className="text-gray-500 text-xs md:text-sm whitespace-nowrap">
+                                        {new Date(item.created_at).toLocaleDateString()} at {new Date(item.created_at).toLocaleTimeString()}
+                                    </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleRow(item._id);
+                                        }}
+                                        className="hidden md:flex items-center gap-1.5 text-primary hover:text-primary-dark font-bold text-xs transition-colors mt-1"
+                                    >
+                                        <Eye size={14} /> {expandedRows.has(item._id) ? 'Hide Payload' : 'View Payload'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Card Body (Expanded) */}
+                            {expandedRows.has(item._id) && (
+                                <div className="border-t border-secondary-lighter bg-gray-50/50">
+                                    <div className="px-5 py-6 md:px-8">
+                                        <div className="space-y-4">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                <h4 className="text-sm font-bold text-primary-dark uppercase tracking-wide flex items-center gap-2">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                                                    Payload Details
+                                                </h4>
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${item.processing_status === 'pending' ? 'bg-yellow-50 border-yellow-200 text-yellow-700' :
+                                                            item.processing_status === 'success' ? 'bg-green-50 border-green-200 text-green-700' :
+                                                                'bg-red-50 border-red-200 text-red-700'
+                                                        }`}>
+                                                        {item.processing_status}
+                                                    </span>
+                                                    <span className="text-[10px] text-gray-400 font-mono">ID: {item._id}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-[#1e293b] rounded-xl p-5 shadow-inner border border-gray-700 max-h-[500px] overflow-auto custom-scrollbar group relative">
+                                                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigator.clipboard.writeText(JSON.stringify(item.payload, null, 2));
+                                                        }}
+                                                        className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs text-white transition-colors"
+                                                        title="Copy JSON"
+                                                    >
+                                                        Copy
+                                                    </button>
+                                                </div>
+                                                <pre className="text-xs text-blue-200 font-mono whitespace-pre-wrap leading-relaxed">
+                                                    {JSON.stringify(item.payload, null, 2)}
+                                                </pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             )}
-                        </tbody>
-                    </table>
-                </div>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );
