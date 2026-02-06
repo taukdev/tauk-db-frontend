@@ -42,6 +42,7 @@ import ReportPage from './pages/ReportPage';
 import ActiveCampaignsPage from './pages/ActiveCampaignsPage';
 import AddNewCampaign from './components/activeCampaigns/AddNewCampaign';
 import UploadRecords from './components/vendors/UploadRecords';
+import WebhookStatistics from './components/vendors/detail/WebhookStatistics';
 
 
 function App() {
@@ -74,6 +75,7 @@ function App() {
             <Route path="/vendors" element={<VendorsPage />} />
             <Route path="/vendors/add" element={<AddVendor />} />
             <Route path="/vendor/list/:id/api-posting-instruction" element={<ApiPostingInstruction />} />
+            <Route path="/vendor/list/:id/webhook" element={<WebhookStatistics />} />
             <Route path="/vendor/list/:listId/upload" element={<UploadRecords />} />
             <Route path="/vendor/list-add/:id" element={<VendorListAdd />} />
             <Route path="/vendor/:vendorId/list/:id" element={<VendorListDetail />} />
@@ -85,8 +87,8 @@ function App() {
             <Route path="/outgoing-post/:id/modify" element={<ModifyPosts />} />
             <Route path="/report" element={<ReportPage />} />
             <Route path="/report/scrub-report" element={<ScrubReport />} />
-            <Route path='/report/list-import-status' element={ <ListImportState/> }/>
-            <Route path='/report/lead-delivery-report' element={ <ReportLeadDelivery/> }/>
+            <Route path='/report/list-import-status' element={<ListImportState />} />
+            <Route path='/report/lead-delivery-report' element={<ReportLeadDelivery />} />
             <Route path="/report/send-report" element={<SendReport />} />
 
             <Route path="/outgoing-post" element={<OutGoingPost />} />
