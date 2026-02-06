@@ -144,9 +144,9 @@ function VendorLists({ vendorName }) {
     "List Name",
     "Date Added",
     "Vertical",
-    "# of Records",
     "Status",
     "API",
+    "Webhook",
     "Upload Data",
   ];
 
@@ -155,9 +155,9 @@ function VendorLists({ vendorName }) {
     "List Name": (i) => i.listName,
     "Date Added": (i) => i.dateAdded,
     Vertical: (i) => i.vertical,
-    "# of Records": (i) => i.records,
     Status: (i) => i.status,
     API: (i) => i.api || "",
+    Webhook: (i) => i.webhook || "",
     "Upload Data": (i) => i.uploadData || "",
   };
 
@@ -287,7 +287,6 @@ function VendorLists({ vendorName }) {
                   </td>
                   <td className="px-3 py-4">{item.dateAdded}</td>
                   <td className="px-3 py-4">{item.vertical}</td>
-                  <td className="px-3 py-4">{item.records}</td>
                   <td className="px-3 py-4">
                     <div className="inline-block">
                       {actionLoading === item.id ? (
@@ -304,7 +303,7 @@ function VendorLists({ vendorName }) {
                             });
                             setModalOpen(true);
                           }}
-                          title={ (item.status || "").toLowerCase() === "archived" ? "Unarchive" : "Archive" }
+                          title={(item.status || "").toLowerCase() === "archived" ? "Unarchive" : "Archive"}
                           className={`px-3 py-1 rounded-full text-xs ${statusStyles[item.status]}`}
                         >
                           {item.status}
@@ -313,12 +312,17 @@ function VendorLists({ vendorName }) {
                     </div>
                   </td>
                   <td className="px-3 py-4">
-                    <Link to={`/vendor/list/${item.id}/api-posting-instruction`} className="text-primary underline decoration-dashed underline-offset-4">
+                    <Link to={`/vendor/list/${id}/api-posting-instruction`} className="text-primary underline decoration-dashed underline-offset-4">
                       Instructions
                     </Link>
                   </td>
+                  <td className="px-3 py-4">
+                    <Link to={`/vendor/list/${id}/webhook`} className="text-primary underline decoration-dashed underline-offset-4">
+                      Webhook
+                    </Link>
+                  </td>
                   <td className="px-3 py-4 text-center">
-                    <Link 
+                    <Link
                       to={`/vendor/list/${item.id}/upload`}
                       className="inline-block cursor-pointer"
                       title="Upload CSV to this list"

@@ -34,19 +34,19 @@ export default function ApiPostingInstruction() {
 
                 // Fetch vendor API configs
                 const response = await getVendorApiConfigsApi(vendorIdParam);
-                
+
                 // Handle different response structures
                 let vendorInfo = null;
                 let listsData = [];
 
                 if (response?.data) {
-                    vendorInfo = response.data.vendor || response.data;
-                    listsData = response.data.lists || [];
-                } else if (response?.vendor) {
-                    vendorInfo = response.vendor;
-                    listsData = response.lists || [];
+                    vendorInfo = response.data.vendor || response.data.Vendor || (response.data.api_config ? response.data.Vendor : response.data);
+                    listsData = response.data.lists || (response.data.api_config ? [response.data] : []);
+                } else if (response?.vendor || response?.Vendor) {
+                    vendorInfo = response.vendor || response.Vendor;
+                    listsData = response.lists || (response.api_config ? [response] : []);
                 } else {
-                    listsData = Array.isArray(response) ? response : [];
+                    listsData = Array.isArray(response) ? response : (response?.api_config ? [response] : []);
                 }
 
                 setVendorData(vendorInfo);

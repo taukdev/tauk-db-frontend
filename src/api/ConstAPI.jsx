@@ -30,6 +30,7 @@ export const GET_DEDUPE_BACK_PATH = "/general/dedupe-backs/user";
 export const UPLOAD_CSV_PATH = "/general/list/upload-csv";
 export const GET_VENDOR_API_CONFIGS_PATH = "/general/lists/vendor/api-configs";
 export const UPDATE_LIST_STATUS_PATH = "/general/list/status";
+export const GET_WEBHOOK_STATS_PATH = "/general/webhooks";
 
 // Active Campaigns
 export const GET_ACTIVE_CAMPAIGNS_PATH = "/general/active-campaigns";

@@ -27,24 +27,17 @@ const referrers = [
 
 const validationSchema = Yup.object({
     vendorName: Yup.string().required('Vendor name is required'),
-    companyName: Yup.string().required('Company name is required'),
     vendorType: Yup.string().required('Vendor type is required'),
-    paymentTerm: Yup.string().required('Payment term is required'),
-    phoneNumber: Yup.string()
-        .required('Phone number is required')
-        .matches(
-            /^(\+?\d{1,3}[- ]?)?\d{10}$/,
-            'Invalid phone number'
-        ),
-    faxNumber: Yup.string()
-        .required('Fax number is required')
-        .matches(/^[0-9+\-() ]*$/, 'Invalid fax number'),
-    email: Yup.string().email('Invalid email address').required('Email is required'),
-    address: Yup.string().required('Address is required'),
-    city: Yup.string().required('City is required'),
-    state: Yup.string().required('State is required'),
-    zip: Yup.string().required('Zip is required'),
-    country: Yup.string().required('Country is required'),
+    companyName: Yup.string(),
+    paymentTerm: Yup.string(),
+    phoneNumber: Yup.string(),
+    faxNumber: Yup.string(),
+    email: Yup.string().email('Invalid email address'),
+    address: Yup.string(),
+    city: Yup.string(),
+    state: Yup.string(),
+    zip: Yup.string(),
+    country: Yup.string(),
     otherContactInfo: Yup.string(),
     referrer: Yup.string(),
     allowRecordingUpload: Yup.boolean(),
@@ -111,17 +104,17 @@ const AddVendor = () => {
 
                 const payload = {
                     vendor_name: values.vendorName,
-                    company_name: values.companyName,
                     vendor_type: convertToInt(values.vendorType),
-                    payment_term: convertToInt(values.paymentTerm),
-                    phone_number: values.phoneNumber,
-                    fax_number: values.faxNumber,
-                    email: values.email,
-                    address: values.address,
-                    city: values.city,
-                    state: convertToInt(values.state),
-                    zip: values.zip,
-                    country: convertToInt(values.country),
+                    company_name: values.companyName || values.vendorName, // Default to vendor name if company name is empty
+                    payment_term: convertToInt(values.paymentTerm) || null,
+                    phone_number: values.phoneNumber || '',
+                    fax_number: values.faxNumber || '',
+                    email: values.email || '',
+                    address: values.address || '',
+                    city: values.city || '',
+                    state: convertToInt(values.state) || null,
+                    zip: values.zip || '',
+                    country: convertToInt(values.country) || null,
                     other_contact_info: values.otherContactInfo || '',
                     referrer: values.referrer?.trim() || null,
                     allow_recording_upload: values.allowRecordingUpload || false,
@@ -247,25 +240,6 @@ const AddVendor = () => {
                                 </div>
                             </div>
 
-                            {/* Company Name */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    Company Name
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="companyName"
-                                        type="text"
-                                        placeholder="Company name"
-                                        value={formik.values.companyName}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.companyName ? formik.errors.companyName : ""}
-                                    />
-                                </div>
-                            </div> */}
-
-
                             {/* Vendor Type */}
                             <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
@@ -285,251 +259,7 @@ const AddVendor = () => {
                                 </div>
                             </div>
 
-                            {/* Payment Term */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    Payment Term
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="paymentTerm"
-                                        isSelect={true}
-                                        options={paymentTerms}
-                                        placeholder="Payment term"
-                                        value={formik.values.paymentTerm}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.paymentTerm ? formik.errors.paymentTerm : ""}
-                                    />
-                                </div>
-                            </div> */}
-
-                            {/* Phone Number */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    Phone Number
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="phoneNumber"
-                                        type="tel"
-                                        placeholder="Phone number"
-                                        value={formik.values.phoneNumber}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.phoneNumber ? formik.errors.phoneNumber : ""}
-                                    />
-                                </div>
-                            </div> */}
-
-                            {/* Fax Number */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    Fax Number
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="faxNumber"
-                                        type="text"
-                                        placeholder="Fax number"
-                                        value={formik.values.faxNumber}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.faxNumber ? formik.errors.faxNumber : ""}
-                                    />
-                                </div>
-                            </div> */}
-
-                            {/* Email */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    Email
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="email"
-                                        type="email"
-                                        placeholder="Email address"
-                                        value={formik.values.email}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.email ? formik.errors.email : ""}
-                                    />
-                                </div>
-                            </div> */}
-
-                            {/* Address */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    Address
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="address"
-                                        type="text"
-                                        placeholder="Address"
-                                        value={formik.values.address}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.address ? formik.errors.address : ""}
-                                    />
-                                </div>
-                            </div> */}
-
-                            {/* City
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    City
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="city"
-                                        type="text"
-                                        placeholder="City"
-                                        value={formik.values.city}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.city ? formik.errors.city : ""}
-                                    />
-                                </div>
-                            </div> */}
-
-                            {/* Country */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    Country
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="country"
-                                        isSelect={true}
-                                        options={countries}
-                                        placeholder="Country"
-                                        value={formik.values.country}
-                                        onChange={(e) => {
-                                            const countryValue = e.target.value;
-                                            formik.handleChange(e);
-                                            formik.setFieldValue('state', '');
-                                            if (countryValue !== null && countryValue !== undefined && countryValue !== '') {
-                                                const stringValue = String(countryValue).trim();
-                                                if (stringValue !== '') {
-                                                    setSelectedCountryId(countryValue);
-                                                } else {
-                                                    setSelectedCountryId(null);
-                                                }
-                                            } else {
-                                                setSelectedCountryId(null);
-                                            }
-                                        }}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.country ? formik.errors.country : ""}
-                                    />
-                                </div>
-                            </div> */}
-
-                            {/* State */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    State
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="state"
-                                        isSelect={true}
-                                        options={states}
-                                        placeholder={selectedCountryId ? (statesLoading ? "Loading states..." : "Select state") : "Select country first"}
-                                        value={formik.values.state}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.state ? formik.errors.state : ""}
-                                        disabled={!selectedCountryId || statesLoading}
-                                    />
-                                </div>
-                            </div> */}
-
-                            {/* Zip */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    Zip
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="zip"
-                                        type="text"
-                                        placeholder="Enter zip"
-                                        value={formik.values.zip}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.zip ? formik.errors.zip : ""}
-                                    />
-                                </div>
-                            </div> */}
-
-                            {/* Other Contact Info */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    Other Contact Info
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="otherContactInfo"
-                                        isTextArea={true}
-                                        placeholder="eg: Skype: examplehandle"
-                                        value={formik.values.otherContactInfo}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.otherContactInfo ? formik.errors.otherContactInfo : ""}
-                                        rows={2}
-                                        className='mb-0'
-                                    />
-                                    <div className="text-xs text-gray-500 mb-2">Skype, WhatsApp, Viber, etc.</div>
-                                </div>
-                            </div> */}
-
-                            {/* Referrer */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    Referrer
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="referrer"
-                                        type="text"
-                                        placeholder="Enter referrer"
-                                        value={formik.values.referrer}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.referrer ? formik.errors.referrer : ""}
-                                    />
-                                </div>
-                            </div> */}
-
-                            {/* Allow Recording Upload */}
-                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                                <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                                    Allow Recording Upload
-                                </label>
-                                <div className="w-full md:w-3/4">
-                                    <CustomTextField
-                                        name="allowRecordingUpload"
-                                        isToggle={true}
-                                        value={formik.values.allowRecordingUpload}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                    />
-                                </div>
-                            </div> */}
-
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-6 mb-8">
-                    
-                                {/* <div className="flex gap-2 items-start md:items-center w-full md:w-[70%] lg:w-auto text-[11.5px] text-gray-600">
-                                    <img src={DangerCircleIcon} alt="Danger Icon" className="w-4 h-4 mt-0.5 md:mt-0" />
-                                    <p className="text-justify">
-                                        The system will automatically generate a Username and Password for this vendor. You will see them on the next page.
-                                    </p>
-                                </div> */}
-
-                                {/* Right Column - Submit Button */}
                                 <div className="w-full md:w-auto">
                                     <CustomButton
                                         position="start"
@@ -542,8 +272,6 @@ const AddVendor = () => {
                                     </CustomButton>
                                 </div>
                             </div>
-
-
                         </form>
                         {vendorData && (
                             <VendorAddPopup
@@ -552,7 +280,7 @@ const AddVendor = () => {
                                 vendorName={vendorData.vendorName}
                                 username={vendorData.username}
                                 password={vendorData.password}
-                                vendorId={vendorData.vendorId} //  pass vendor ID correctly
+                                vendorId={vendorData.vendorId}
                             />
                         )}
                     </div>
