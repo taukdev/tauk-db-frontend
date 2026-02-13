@@ -193,7 +193,7 @@ const ActiveList = ({ title = "Active Lists" }) => {
         const transformedData = rawData.map((item) => ({
           id: item.id,
           name: item.listName || item.list_name || "-",
-          totalLeadCount: item.records || item.sell_times || 0,
+          totalLeadCount: item.total_leads,
           importStats: {
             imported: 0,
             failed: 0,

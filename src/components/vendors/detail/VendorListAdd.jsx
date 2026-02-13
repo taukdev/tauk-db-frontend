@@ -16,7 +16,7 @@ import { createListApi } from "../../../api/vendors";
 import { useNavigate } from "react-router-dom";
 
 
-const requiredFields = [
+const requiredFieldsLabels = [
   "Email Address",
   "First Name",
   "Last Name",
@@ -33,6 +33,18 @@ const requiredFields = [
   "Signup Date",
   "Date of Birth",
   "Comments",
+];
+
+const defaultRequiredFields = [
+  "Email Address",
+  "First Name",
+  "Last Name",
+  "Phone Number",
+  "Country",
+  "City",
+  "State",
+  "Zip Code",
+  "Offer Form URL",
 ];
 
 
@@ -118,7 +130,10 @@ function VendorListAdd() {
           "Comments": "comments",
         };
 
-        const mappedRequiredFields = values.requiredFields.map(
+        // Ensure default fields are ALWAYS included in the payload, even if unticked in UI
+        const allRequiredFields = Array.from(new Set([...values.requiredFields, ...defaultRequiredFields]));
+
+        const mappedRequiredFields = allRequiredFields.map(
           (field) => requiredFieldsMap[field] || field.toLowerCase().replace(/\s+/g, '_')
         );
 
@@ -796,7 +811,7 @@ function VendorListAdd() {
               </label>
 
               <div className="w-full md:w-3/4">
-                {requiredFields.map((field) => (
+                {requiredFieldsLabels.map((field) => (
                   <div key={field} className="mb-1">
                     <Checkbox
                       id={`req-${field}`}

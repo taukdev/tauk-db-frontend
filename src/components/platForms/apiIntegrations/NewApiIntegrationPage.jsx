@@ -26,7 +26,8 @@ const requestTypes = [
 const validationSchema = Yup.object({
   apiDescription: Yup.string().required("API description is required"),
   apiType: Yup.string().required("API type is required"),
-  serviceProvider: Yup.string(),
+  platform: Yup.string(),
+  campaignId: Yup.string(),
   apiEndpoint: Yup.string().required("API endpoint is required"),
   timeout: Yup.number()
     .min(1, "Minimum 1 second")
@@ -51,7 +52,8 @@ function NewApiIntegrationPage() {
     initialValues: {
       apiDescription: '',
       apiType: 'Regular API',
-      serviceProvider: 'custom', // Match the select option value
+      platform: 'custom',
+      campaignId: '',
       apiEndpoint: '',
       timeout: 60,
       postVariables: '',
@@ -92,7 +94,8 @@ function NewApiIntegrationPage() {
       const payload = {
         api_description: values.apiDescription,
         api_type: values.apiType,
-        service_provider: capitalizeServiceProvider(values.serviceProvider) || "Custom",
+        platform: capitalizeServiceProvider(values.platform) || "Custom",
+        campaign_id: values.campaignId,
         api_endpoint: values.apiEndpoint,
         timeout_after: parseInt(values.timeout) || 60,
         request_type: values.requestType.toUpperCase(),
@@ -189,12 +192,12 @@ function NewApiIntegrationPage() {
 
               <hr className="border-t border-[#F1F1F4] mb-2" />
 
-              {/* Service Provider */}
+              {/* Platform Selection */}
               <div className='mx-6 flex flex-col md:flex-row md:items-center gap-3'>
                 <div className='md:w-[200px]'>
                   <CustomTextField
-                    label="Service Provider"
-                    name="serviceProvider"
+                    label="Platform"
+                    name="platform"
                     isSelect={true}
                     options={[
                       { label: 'Custom', value: 'custom' },
@@ -202,20 +205,35 @@ function NewApiIntegrationPage() {
                       { label: 'Adopia', value: 'adopia' },
                       { label: 'Drip', value: 'drip' },
                       { label: 'ListFlex', value: 'listflex' },
-
+                      { label: 'Daily Story', value: 'daily_story' },
+                      { label: 'TaukDial', value: 'taukdial' },
                     ]}
-                    value={formik.values.serviceProvider}
+                    value={formik.values.platform}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    error={formik.touched.serviceProvider ? formik.errors.serviceProvider : ''}
+                    error={formik.touched.platform ? formik.errors.platform : ''}
                   />
                 </div>
 
                 <div className="text-xs text-gray-500 mb-2 pt-0 md:pt-2">
-                  Click this dropdown to see if we have an API built for your service
+                  Select a platform to configure API integration
                 </div>
               </div>
 
+              {/* Campaign ID - Show when platform is selected */}
+              {formik.values.platform && formik.values.platform !== 'custom' && (
+                <div className='mx-6'>
+                  <CustomTextField
+                    label="Campaign ID"
+                    name="campaignId"
+                    placeholder="Enter campaign ID"
+                    value={formik.values.campaignId}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.campaignId ? formik.errors.campaignId : ''}
+                  />
+                </div>
+              )}
 
               <div className='mx-6'>
                 <CustomTextField

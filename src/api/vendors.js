@@ -1,5 +1,5 @@
 import { apiJson, axiosInstance } from "./http.js";
-import { GET_VENDORS_PATH, GET_VENDOR_BY_ID_PATH, UPDATE_VENDOR_PATH, ACTIVATE_VENDOR_PATH, DEACTIVATE_VENDOR_PATH, GET_VENDOR_TYPES_PATH, GET_PAYMENT_TERMS_PATH, GET_COUNTRIES_PATH, GET_STATES_BY_COUNTRY_PATH, CREATE_VENDOR_PATH, SEARCH_VENDORS_PATH, GET_VENDOR_LISTS_PATH, CREATE_LIST_PATH, UPDATE_LIST_PATH, ACTIVATE_LIST_PATH, DEACTIVATE_LIST_PATH, GET_LIST_BY_ID_PATH, GET_LIST_VERTICAL_PATH, GET_DEDUPE_BACK_PATH, UPLOAD_CSV_PATH, GET_VENDOR_API_CONFIGS_PATH, UPDATE_LIST_STATUS_PATH, GET_WEBHOOK_STATS_PATH } from "./ConstAPI.jsx";
+import { GET_VENDORS_PATH, GET_VENDOR_BY_ID_PATH, UPDATE_VENDOR_PATH, ACTIVATE_VENDOR_PATH, DEACTIVATE_VENDOR_PATH, GET_VENDOR_TYPES_PATH, GET_PAYMENT_TERMS_PATH, GET_COUNTRIES_PATH, GET_STATES_BY_COUNTRY_PATH, CREATE_VENDOR_PATH, SEARCH_VENDORS_PATH, GET_VENDOR_LISTS_PATH, CREATE_LIST_PATH, UPDATE_LIST_PATH, ACTIVATE_LIST_PATH, DEACTIVATE_LIST_PATH, GET_LIST_BY_ID_PATH, GET_LIST_VERTICAL_PATH, GET_DEDUPE_BACK_PATH, UPLOAD_CSV_PATH, GET_VENDOR_API_CONFIGS_PATH, UPDATE_LIST_STATUS_PATH, GET_WEBHOOK_STATS_PATH, GET_VENDOR_WEBHOOKS_PATH } from "./ConstAPI.jsx";
 
 /**
  * Get vendor by ID
@@ -371,17 +371,35 @@ export async function uploadCsvApi(listId, formData) {
   return response.data;
 }
 
-/**
- * Get webhook statistics for a list
- * @param {string|number} listId
- * @returns {Promise} API response
- */
-export async function getWebhookStatsApi(listId) {
+export async function getWebhookStatsApi(listId, params = {}) {
   if (!listId) {
     throw new Error("List ID is required");
   }
 
-  return await apiJson(`${GET_WEBHOOK_STATS_PATH}/${listId}/statistics`, {
+  const queryParams = new URLSearchParams();
+  if (params.startDate) queryParams.append("startDate", params.startDate);
+  if (params.endDate) queryParams.append("endDate", params.endDate);
+  if (params.vendor_id) queryParams.append("vendor_id", params.vendor_id);
+
+  const queryString = queryParams.toString();
+  const url = `${GET_WEBHOOK_STATS_PATH}/${listId}/statistics${queryString ? `?${queryString}` : ""}`;
+
+  return await apiJson(url, {
+    method: "GET",
+  });
+}
+
+/**
+ * Get webhooks for all lists of a vendor
+ * @param {string|number} vendorId
+ * @returns {Promise} API response
+ */
+export async function getVendorWebhooksApi(vendorId) {
+  if (!vendorId) {
+    throw new Error("Vendor ID is required");
+  }
+
+  return await apiJson(`${GET_VENDOR_WEBHOOKS_PATH}/${vendorId}`, {
     method: "GET",
   });
 }

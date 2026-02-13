@@ -90,6 +90,7 @@ const sidebarItems = [
     submenu: [
       { name: "List Import Stats", link: "/report/list-import-status" },
       { name: "Lead Delivery Report", link: "/report/lead-delivery-report" },
+      { name: "Webhook History Report", link: "/report/webhook-history-report" },
       // { name: "Scrub Report", link: "/report/scrub-report" },
       // { name: "Send Report", link: "/report/send-report" },
     ],
@@ -133,7 +134,7 @@ export default function AdminPanel() {
   const [showLogout, setShowLogout] = useState(false);
   const location = useLocation();
   const breadcrumbs = useSelector((state) => state.breadcrumbs);
-  
+
   // Get current user from auth storage
   const { user } = getAuth();
   const userName = user?.name || user?.user_name || "User";
@@ -230,8 +231,7 @@ export default function AdminPanel() {
       {/* Sidebar */}
       <aside
         className={`bg-white shadow-md flex flex-col fixed md:static z-40 h-full transition-all duration-300
-          ${
-            sidebarOpen ? "left-0 w-64 md:w-64" : "-left-64 w-0 md:w-0"
+          ${sidebarOpen ? "left-0 w-64 md:w-64" : "-left-64 w-0 md:w-0"
           } md:left-0`}
         style={{ overflow: sidebarOpen ? "visible" : "hidden" }}
       >
@@ -256,11 +256,10 @@ export default function AdminPanel() {
                 {item.type === "tab" ? (
                   <Link
                     to={item.Link}
-                    className={`w-full flex items-center space-x-3 px-3 py-3 rounded-md ${
-                      selectedTab === index
+                    className={`w-full flex items-center space-x-3 px-3 py-3 rounded-md ${selectedTab === index
                         ? "bg-neutral text-black"
                         : "hover:bg-[#F5F7F9]"
-                    }`}
+                      }`}
                     style={{ textDecoration: "none" }}
                   >
                     {selectedTab === index ? item.boldIcon : item.icon}
@@ -282,10 +281,9 @@ export default function AdminPanel() {
                         setSelectedTab(index);
                       }}
                       className={`w-full flex justify-between items-center px-3 py-3 rounded-md transition-all duration-200 cursor-pointer
-                        ${
-                          selectedTab === index
-                            ? "bg-neutral text-black"
-                            : "hover:bg-[#F5F7F9] text-[#646E88]"
+                        ${selectedTab === index
+                          ? "bg-neutral text-black"
+                          : "hover:bg-[#F5F7F9] text-[#646E88]"
                         }`}
                     >
                       <div className="flex items-center space-x-3">
@@ -302,15 +300,13 @@ export default function AdminPanel() {
                       </div>
                       <ChevronDown
                         className={`transition-transform duration-200 cursor-pointer
-                          ${
-                            selectedTab === index
-                              ? "text-primary-dark"
-                              : "text-[#646E88]"
+                          ${selectedTab === index
+                            ? "text-primary-dark"
+                            : "text-[#646E88]"
                           } 
-                          ${
-                            activeDropdown === index
-                              ? "rotate-180"
-                              : ""
+                          ${activeDropdown === index
+                            ? "rotate-180"
+                            : ""
                           }`}
                       />
                     </button>
@@ -318,10 +314,9 @@ export default function AdminPanel() {
                     {/* Submenu */}
                     <div
                       className={`overflow-hidden transition-all duration-300 ease-in-out
-                        ${
-                          activeDropdown === index
-                            ? "max-h-96 opacity-100"
-                            : "max-h-0 opacity-0"
+                        ${activeDropdown === index
+                          ? "max-h-96 opacity-100"
+                          : "max-h-0 opacity-0"
                         }`}
                     >
                       <div className="relative mt-2">
@@ -342,10 +337,9 @@ export default function AdminPanel() {
                                 <Link
                                   to={path}
                                   className={`block py-2 pl-5 pr-3 ml-3 rounded-md text-sm transition-all duration-150
-                                    ${
-                                      isActive
-                                        ? "bg-neutral text-primary-dark font-medium"
-                                        : "text-[#646E88] hover:bg-gray-100 hover:text-primary-dark"
+                                    ${isActive
+                                      ? "bg-neutral text-primary-dark font-medium"
+                                      : "text-[#646E88] hover:bg-gray-100 hover:text-primary-dark"
                                     }`}
                                   style={{ textDecoration: "none" }}
                                 >

@@ -37,6 +37,8 @@ const validationSchema = Yup.object({
     successfulResponse: Yup.string(),
     headers: Yup.string(),
     fieldMapping: Yup.string(),
+    platform: Yup.string(),
+    campaignId: Yup.string(),
 });
 
 function EditApiIntegrations() {
@@ -76,7 +78,8 @@ function EditApiIntegrations() {
         if (!data) return {
             apiDescription: "",
             apiType: "Regular API",
-            serviceProvider: "Custom",
+            platform: "custom",
+            campaignId: "",
             apiEndpoint: "",
             timeout: 60,
             dateFormat: "",
@@ -91,7 +94,8 @@ function EditApiIntegrations() {
         return {
             apiDescription: data.name || data.api_description || "",
             apiType: data.apiType || data.api_type || "Regular API",
-            serviceProvider: data.serviceProvider || data.service_provider || "custom",
+            platform: data.platform || 'custom',
+            campaignId: data.campaign_id || "",
             apiEndpoint: cleanApiEndpoint(data.apiEndpoint || data.api_endpoint || data.postUrl),
             timeout: data.timeout || data.timeout_after || 60,
             postVariables: data.postVariables || data.post_variables || "",
@@ -138,7 +142,9 @@ function EditApiIntegrations() {
             const payload = {
                 api_description: values.apiDescription,
                 api_type: values.apiType,
-                service_provider: capitalizeServiceProvider(values.serviceProvider) || "Custom",
+                service_provider: capitalizeServiceProvider(values.platform) || "Custom",
+                platform: values.platform,
+                campaign_id: values.campaignId,
                 api_endpoint: values.apiEndpoint,
                 timeout_after: parseInt(values.timeout) || 60,
                 request_type: values.requestType.toUpperCase(),
@@ -230,6 +236,51 @@ function EditApiIntegrations() {
                                     error={formik.touched.apiType ? formik.errors.apiType : ""}
                                 />
                             </div>
+
+                            <hr className="border-t border-[#F1F1F4] mb-2" />
+
+                            {/* Platform Selection */}
+                            <div className='mx-6 flex flex-col md:flex-row md:items-center gap-3'>
+                                <div className='md:w-[200px]'>
+                                    <CustomTextField
+                                        label="Platform"
+                                        name="platform"
+                                        isSelect={true}
+                                        options={[
+                                            { label: 'Custom', value: 'custom' },
+                                            { label: 'Active Campaign', value: 'active_campaign' },
+                                            { label: 'Adopia', value: 'adopia' },
+                                            { label: 'Drip', value: 'drip' },
+                                            { label: 'ListFlex', value: 'listflex' },
+                                            { label: 'Daily Story', value: 'daily_story' },
+                                            { label: 'TaukDial', value: 'taukdial' },
+                                        ]}
+                                        value={formik.values.platform}
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        error={formik.touched.platform ? formik.errors.platform : ''}
+                                    />
+                                </div>
+
+                                <div className="text-xs text-gray-500 mb-2 pt-0 md:pt-2">
+                                    Select a platform to configure API integration
+                                </div>
+                            </div>
+
+                            {/* Campaign ID - Show when platform is selected */}
+                            {formik.values.platform && formik.values.platform !== 'custom' && (
+                                <div className='mx-6'>
+                                    <CustomTextField
+                                        label="Campaign ID"
+                                        name="campaignId"
+                                        placeholder="Enter campaign ID"
+                                        value={formik.values.campaignId}
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        error={formik.touched.campaignId ? formik.errors.campaignId : ''}
+                                    />
+                                </div>
+                            )}
 
                             {/* API Endpoint */}
                             <div className="mx-6">

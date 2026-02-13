@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { Copy, Check } from 'lucide-react';
 import UnionIcon from "../../../assets/icons/Union-icon.svg";
 import BookApiICon from "../../../assets/icons/Bookapis-icon.svg";
 import { selectVendorById } from '../../../features/vendor/vendorSlice';
@@ -11,14 +12,21 @@ import { API_BASE_URL } from '../../../api/BaseUrl';
 import LoadingSpinner from '../../common/LoadingSpinner';
 
 export default function ApiPostingInstruction() {
-    const { id: vendorIdParam } = useParams(); // Treating :id as vendor_id based on user's example
+    const { id: vendorIdParam } = useParams();
     const [lists, setLists] = useState([]);
     const [vendorData, setVendorData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [copiedId, setCopiedId] = useState(null);
 
     const vendor = useSelector((state) => selectVendorById(state, vendorIdParam));
     const dispatch = useDispatch();
+
+    const handleCopy = (text, id) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -170,13 +178,27 @@ export default function ApiPostingInstruction() {
                                     <div className="font-medium text-[13px] sm:text-[14px] text-neutral min-w-[80px]">
                                         API URL
                                     </div>
-                                    <div className="flex-1 min-w-[200px]">
-                                        <pre className="bg-[#F7F9FB] bg-secondary-light border border-[#E1E3EA] rounded-lg p-3 text-xs overflow-x-auto whitespace-pre-wrap break-words break-all font-mono">
+                                    <div className="flex-1 min-w-[200px] relative group">
+                                        <pre className="bg-[#F7F9FB] bg-secondary-light border border-[#E1E3EA] rounded-lg p-3 pr-10 text-xs overflow-x-auto whitespace-pre-wrap break-words break-all font-mono">
                                             {item.apiUrl}
                                         </pre>
+                                        <button
+                                            onClick={() => handleCopy(item.apiUrl, `url-${item.id}`)}
+                                            className="absolute right-2 top-2 p-1.5 hover:bg-white rounded transition-colors"
+                                            title="Copy API URL"
+                                        >
+                                            {copiedId === `url-${item.id}` ? <Check size={14} className="text-green-600" /> : <Copy size={14} className="text-gray-400" />}
+                                        </button>
                                         {item.notes && (
-                                            <div className="text-xs text-neutral mt-2">
+                                            <div className="text-xs text-neutral mt-2 flex items-center gap-2">
                                                 <span className="font-semibold">Notes:</span> {item.notes}
+                                                <button
+                                                    onClick={() => handleCopy(item.authToken, `token-${item.id}`)}
+                                                    className="p-1 hover:bg-gray-100 rounded transition-colors"
+                                                    title="Copy Auth Token"
+                                                >
+                                                    {copiedId === `token-${item.id}` ? <Check size={10} className="text-green-600" /> : <Copy size={10} className="text-gray-400" />}
+                                                </button>
                                             </div>
                                         )}
                                     </div>

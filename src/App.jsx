@@ -43,6 +43,7 @@ import ActiveCampaignsPage from './pages/ActiveCampaignsPage';
 import AddNewCampaign from './components/activeCampaigns/AddNewCampaign';
 import UploadRecords from './components/vendors/UploadRecords';
 import WebhookStatistics from './components/vendors/detail/WebhookStatistics';
+import WebhookHistoryReport from './components/reports/WebhookHistoryReport';
 
 
 function App() {
@@ -67,11 +68,8 @@ function App() {
             <Route path="/platforms/:id/new-api-integration" element={<NewApiIntegrationPage />} />
             <Route path="/platforms/:id/edit-api-integration/:integrationId" element={<EditApiIntegrationsPage />} />
             <Route path="/platforms/:id/send-leads" element={<SendLeadsForm />} />
-
-            // order route
             <Route path="/platform/:platformId/orders/:id" element={<OrderDetail />} />
             <Route path="/platform/:platformId/orders/:id/lead-delivery-report" element={<LeadDeliveryReport />} />
-
             <Route path="/vendors" element={<VendorsPage />} />
             <Route path="/vendors/add" element={<AddVendor />} />
             <Route path="/vendor/list/:id/api-posting-instruction" element={<ApiPostingInstruction />} />
@@ -89,6 +87,7 @@ function App() {
             <Route path="/report/scrub-report" element={<ScrubReport />} />
             <Route path='/report/list-import-status' element={<ListImportState />} />
             <Route path='/report/lead-delivery-report' element={<ReportLeadDelivery />} />
+            <Route path="/report/webhook-history-report" element={<WebhookHistoryReport />} />
             <Route path="/report/send-report" element={<SendReport />} />
 
             <Route path="/outgoing-post" element={<OutGoingPost />} />

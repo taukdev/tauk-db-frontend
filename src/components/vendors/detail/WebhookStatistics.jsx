@@ -1,32 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { ChevronDown, ChevronUp, Eye, Search } from "lucide-react";
+import { Search, Globe, Copy, Check } from "lucide-react";
 
 import UnionIcon from "../../../assets/icons/Union-icon.svg";
-import { getWebhookStatsApi } from "../../../api/vendors";
+import { getVendorWebhooksApi } from "../../../api/vendors";
 import { setBreadcrumbs } from "../../../features/breadcrumb/breadcrumbSlice";
 import LoadingSpinner from "../../common/LoadingSpinner";
-import Pagination from "../../common/Pagination";
 
 const WebhookStatistics = () => {
     const { id: vendorId } = useParams();
     const dispatch = useDispatch();
 
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState(null);
+    const [data, setData] = useState(null);
     const [error, setError] = useState(null);
-    const [expandedRows, setExpandedRows] = useState(new Set());
     const [search, setSearch] = useState("");
+    const [copiedId, setCopiedId] = useState(null);
 
     const fetchData = async () => {
         try {
             setLoading(true);
-            const res = await getWebhookStatsApi(vendorId);
+            const res = await getVendorWebhooksApi(vendorId);
             if (res?.status === "success") {
-                setStats(res.data);
+                setData(res.data);
             } else {
-                setError("Failed to fetch webhook statistics");
+                setError("Failed to fetch webhook instructions");
             }
         } catch (err) {
             console.error("Error fetching webhook stats:", err);
@@ -41,60 +40,58 @@ const WebhookStatistics = () => {
     }, [vendorId]);
 
     useEffect(() => {
-        if (stats) {
-            const vName = stats.Vendor?.vendor_name || stats.Vendor?.company_name || `Vendor ${vendorId}`;
+        if (data) {
+            const vName = data.vendor?.vendor_name || data.vendor?.company_name || `Vendor ${vendorId}`;
             dispatch(
                 setBreadcrumbs([
                     { label: "Vendors", path: "/vendors" },
                     { label: vName, path: `/vendor/${vendorId}` },
-                    { label: "Webhook Statistics", path: `/vendor/list/${vendorId}/webhook` },
+                    { label: "Webhook Instructions", path: `/vendor/list/${vendorId}/webhook` },
                 ])
             );
         }
-    }, [dispatch, vendorId, stats]);
+    }, [dispatch, vendorId, data]);
 
-    const toggleRow = (id) => {
-        const newExpanded = new Set(expandedRows);
-        if (newExpanded.has(id)) {
-            newExpanded.delete(id);
-        } else {
-            newExpanded.add(id);
-        }
-        setExpandedRows(newExpanded);
+    const handleCopy = (text, id) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
     };
 
-    const filteredHistory = stats?.recent_webhooks?.filter((item) => {
+    const filteredLists = data?.lists?.filter((list) => {
         if (!search) return true;
         const q = search.toLowerCase();
         return (
-            item.webhook_url?.toLowerCase().includes(q) ||
-            item._id?.toLowerCase().includes(q)
+            list.list_name?.toLowerCase().includes(q) ||
+            String(list.id).includes(q)
         );
     }) || [];
 
     return (
         <div className="w-full space-y-6">
-            {/* Header */}
+       
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-2">
-                        <Link to={stats?.vendor_id ? `/vendor/${stats.vendor_id}` : "/vendors"} className="cursor-pointer">
+                        <Link to={vendorId ? `/vendor/${vendorId}` : "/vendors"} className="cursor-pointer">
                             <img src={UnionIcon} alt="Back" className="w-4 h-4 sm:w-5 sm:h-5" />
                         </Link>
                         <h1 className="text-xl font-semibold text-primary-dark">
-                            Webhook History - {stats?.Vendor?.vendor_name || `Vendor ${vendorId}`}
+                            Webhook Posting Instructions - {data?.vendor?.vendor_name || `Vendor ${vendorId}`}
                         </h1>
                     </div>
-                    <p className="text-gray-500 text-sm mt-1">
-                        Total Webhooks: <span className="font-semibold text-primary">{stats?.total_webhooks || 0}</span>
-                    </p>
+                    {data && (
+                        <p className="text-gray-500 text-sm mt-1">
+                            Total Lists: <span className="font-semibold text-primary">{data.total_lists || 0}</span>
+                        </p>
+                    )}
                 </div>
 
                 <div className="relative w-full md:w-72">
                     <input
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search history..."
+                        placeholder="Search lists..."
                         className="w-full border border-gray-300 bg-neutral-input rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
                     />
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
@@ -111,95 +108,51 @@ const WebhookStatistics = () => {
                     <div className="bg-white rounded-xl border border-red-200 p-12 text-center text-red-500">
                         {error}
                     </div>
-                ) : filteredHistory.length === 0 ? (
+                ) : filteredLists.length === 0 ? (
                     <div className="bg-white rounded-xl border border-secondary-lighter p-12 text-center text-gray-500 italic">
-                        No webhook history found.
+                        No lists found.
                     </div>
                 ) : (
-                    filteredHistory.map((item) => (
+                    filteredLists.map((list) => (
                         <div
-                            key={item._id}
-                            className={`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${expandedRows.has(item._id)
-                                    ? 'border-primary shadow-md ring-1 ring-primary/10'
-                                    : 'border-secondary-lighter hover:border-primary/40 shadow-sm'
-                                }`}
+                            key={list.id}
+                            className="bg-white rounded-xl border border-secondary-lighter p-5 shadow-sm hover:shadow-md transition-shadow"
                         >
-                            {/* Card Header */}
-                            <div
-                                className="px-5 py-4 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4"
-                                onClick={() => toggleRow(item._id)}
-                            >
-                                <div className="flex items-start gap-3 flex-1 min-w-0">
-                                    <div className={`mt-1 p-1 rounded transition-colors ${expandedRows.has(item._id) ? 'bg-primary/10 text-primary' : 'text-gray-400'}`}>
-                                        {expandedRows.has(item._id) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <div className="text-secondary-dark text-[10px] font-bold uppercase tracking-wider mb-1">Webhook URL</div>
-                                        <div className="text-primary-dark font-medium break-all text-sm md:text-base">
-                                            {item.webhook_url || '-'}
-                                        </div>
-                                    </div>
+                            <div className="flex flex-col gap-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-lg font-bold text-primary-dark">
+                                        {list.id} - {list.list_name}
+                                    </h3>
+                                    {/* <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${list.is_active ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                                        {list.list_status}
+                                    </div> */}
                                 </div>
 
-                                <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 md:gap-1">
-                                    <div className="text-secondary-dark text-[10px] font-bold uppercase tracking-wider md:hidden">Date & Time</div>
-                                    <div className="text-gray-500 text-xs md:text-sm whitespace-nowrap">
-                                        {new Date(item.created_at).toLocaleDateString()} at {new Date(item.created_at).toLocaleTimeString()}
+                                <div className="space-y-2">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        <div className="text-xs font-bold text-secondary-dark uppercase tracking-wider min-w-[100px]">
+                                            Webhook URL
+                                        </div>
+                                        <div className="flex-1 flex items-center gap-2 group">
+                                            <div className="flex-1 bg-secondary-light border border-secondary-lighter rounded-lg p-3 text-xs font-mono break-all text-primary-dark relative">
+                                                {list.webhook_link}
+                                                <button
+                                                    onClick={() => handleCopy(list.webhook_link, list.id)}
+                                                    className="absolute right-2 top-2 p-1.5 hover:bg-white rounded transition-colors"
+                                                    title="Copy Webhook URL"
+                                                >
+                                                    {copiedId === list.id ? <Check size={14} className="text-green-600" /> : <Copy size={14} className="text-gray-400" />}
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleRow(item._id);
-                                        }}
-                                        className="hidden md:flex items-center gap-1.5 text-primary hover:text-primary-dark font-bold text-xs transition-colors mt-1"
-                                    >
-                                        <Eye size={14} /> {expandedRows.has(item._id) ? 'Hide Payload' : 'View Payload'}
-                                    </button>
+
+                                    <div className="flex items-center gap-2 text-[10px] text-gray-400">
+                                        <Globe size={12} />
+                                        <span>Created on {new Date(list.created_at).toLocaleDateString()}</span>
+                                    </div>
                                 </div>
                             </div>
-
-                            {/* Card Body (Expanded) */}
-                            {expandedRows.has(item._id) && (
-                                <div className="border-t border-secondary-lighter bg-gray-50/50">
-                                    <div className="px-5 py-6 md:px-8">
-                                        <div className="space-y-4">
-                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                                <h4 className="text-sm font-bold text-primary-dark uppercase tracking-wide flex items-center gap-2">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                                                    Payload Details
-                                                </h4>
-                                                <div className="flex items-center gap-3">
-                                                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${item.processing_status === 'pending' ? 'bg-yellow-50 border-yellow-200 text-yellow-700' :
-                                                            item.processing_status === 'success' ? 'bg-green-50 border-green-200 text-green-700' :
-                                                                'bg-red-50 border-red-200 text-red-700'
-                                                        }`}>
-                                                        {item.processing_status}
-                                                    </span>
-                                                    <span className="text-[10px] text-gray-400 font-mono">ID: {item._id}</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="bg-[#1e293b] rounded-xl p-5 shadow-inner border border-gray-700 max-h-[500px] overflow-auto custom-scrollbar group relative">
-                                                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            navigator.clipboard.writeText(JSON.stringify(item.payload, null, 2));
-                                                        }}
-                                                        className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs text-white transition-colors"
-                                                        title="Copy JSON"
-                                                    >
-                                                        Copy
-                                                    </button>
-                                                </div>
-                                                <pre className="text-xs text-blue-200 font-mono whitespace-pre-wrap leading-relaxed">
-                                                    {JSON.stringify(item.payload, null, 2)}
-                                                </pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     ))
                 )}

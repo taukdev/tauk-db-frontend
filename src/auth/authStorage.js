@@ -40,14 +40,14 @@ export function getIsLoggedIn() {
 
 export function setAuth({ token, user, remember = false, rawResponse } = {}) {
   if (typeof window === "undefined") return;
-  
+
   const storage = window.localStorage;
-  
+
   // Don't store isLoggedIn - only token and user
   if (token && typeof token === "string" && token.trim().length > 0) {
     storage.setItem(AUTH_TOKEN_KEY, token);
   }
-  
+
   if (user !== undefined) {
     const userValue = typeof user === "string" ? user : JSON.stringify(user);
     storage.setItem(AUTH_USER_KEY, userValue);

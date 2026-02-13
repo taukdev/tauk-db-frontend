@@ -235,7 +235,7 @@ const VendorList = () => {
 
                     {/* Upload */}
                     <td className="p-3 border border-light">
-                      {vendor.allow_recording_upload || vendor.allowRecordingUpload ? (
+                  
                         <div 
                           className="w-full h-full flex items-center justify-center cursor-pointer"
                           onClick={() => navigate(`/vendor/${vendor.id}`)}
@@ -247,11 +247,7 @@ const VendorList = () => {
                             className="inline-block"
                           />
                         </div>
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-gray-400 text-xs">-</span>
-                        </div>
-                      )}
+                    
                     </td>
                   </tr>
                 )
