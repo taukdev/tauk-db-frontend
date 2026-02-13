@@ -205,55 +205,9 @@ const EditProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* Permissions */}
-                                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                                    <label className="w-full md:w-1/4 text-sm text-neutral  mb-0 md:mb-4">
-                                        Permissions
-                                    </label>
+                       
 
-                                    <div className="w-full md:w-3/4">
-                                        {permissionsList.map((perm, idx) => (
-                                            <div key={idx} className="mb-2">
-                                                <Checkbox
-                                                    name="permissions"
-                                                    value={perm}
-                                                    label={perm}
-                                                    checked={formik.values.permissions.includes(perm)}
-                                                    onChange={() => handleCheckboxChange("permissions", perm)}
-                                                    // optional: customize size/label classes
-                                                    checkboxSize="w-5 h-5"
-                                                    labelClassName="text-sm text-primary-dark"
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Alerts */}
-                                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                                    <label className="w-full md:w-1/4 text-sm text-neutral  mb-0 md:mb-4">
-                                        Alerts
-                                    </label>
-
-                                    <div className="w-full md:w-3/4">
-                                        <p className="text-sm text-gray-500 mb-2">
-                                            Pick alerts you want this user to receive...
-                                        </p>
-                                        {alertsList.map((alert, idx) => (
-                                            <div key={idx} className="mb-2">
-                                                <Checkbox
-                                                    name="alerts"
-                                                    value={alert}
-                                                    label={alert}
-                                                    checked={formik.values.alerts.includes(alert)}
-                                                    onChange={() => handleCheckboxChange("alerts", alert)}
-                                                    checkboxSize="w-5 h-5"
-                                                    labelClassName="text-sm text-primary-dark"
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+                         
 
                                 {/* Submit Button */}
                                 <CustomButton type="submit" className="mt-6 mb-6">
