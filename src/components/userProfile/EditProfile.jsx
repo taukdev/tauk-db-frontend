@@ -203,12 +203,7 @@ const EditProfile = () => {
                                             error={formik.touched.status ? formik.errors.status : ""}
                                         />
                                     </div>
-                                </div>
-
-                       
-
-                         
-
+                                </div>           
                                 {/* Submit Button */}
                                 <CustomButton type="submit" className="mt-6 mb-6">
                                     {meLoading ? "Loading..." : "Save Information"}

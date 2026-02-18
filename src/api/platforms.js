@@ -138,6 +138,21 @@ export async function deleteApiIntegrationApi(platformId, integrationId) {
 }
 
 /**
+ * Fetch platform presets by provider
+ * @param {string} serviceProvider - Service provider name
+ * @returns {Promise} API response
+ */
+export async function getPlatformPresetsByProviderApi(serviceProvider) {
+    const url = serviceProvider 
+        ? `/platform-presets/by-provider?service_provider=${serviceProvider}`
+        : '/platform-presets/by-provider';
+    
+    return await apiJson(url, {
+        method: "GET",
+    });
+}
+
+/**
  * Create a platform order
  * @param {number} platformId - Platform ID
  * @param {Object} payload - Order payload

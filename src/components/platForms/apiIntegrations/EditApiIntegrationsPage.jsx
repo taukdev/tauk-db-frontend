@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import UnionIcon from "../../../assets/icons/Union-icon.svg";
 import { Link, useParams } from "react-router-dom";
 import CustomTextField from "../../CustomTextField";
@@ -9,6 +9,7 @@ import { updateApiIntegration, setCurrentIntegration, fetchApiIntegrationById } 
 import ApiIntegrationPage from "./ApiIntegrationPage";
 import CustomButton from "../../CustomButton";
 import { useNavigate } from "react-router-dom";
+import { getListsDropdownApi } from "../../../api/platforms";
 
 const apiTypes = [
     { label: "Regular API", value: "Regular API" },
@@ -45,6 +46,7 @@ function EditApiIntegrations() {
     const { id, integrationId } = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [listsDropdown, setListsDropdown] = useState([]);
 
     // Get all integrations from redux
     const integrations = useSelector((state) => state.apiIntegrations.integrations || []);
@@ -67,6 +69,24 @@ function EditApiIntegrations() {
             }
         }
     }, [integrationId, integrations, dispatch, integration, platformId]);
+
+    // Fetch lists dropdown on mount
+    useEffect(() => {
+        const fetchLists = async () => {
+            try {
+                const response = await getListsDropdownApi();
+                if (response?.data && Array.isArray(response.data)) {
+                    setListsDropdown(response.data.map(list => ({
+                        label: list.list_name,
+                        value: String(list.id),
+                    })));
+                }
+            } catch (error) {
+                console.error('Error fetching lists dropdown:', error);
+            }
+        };
+        fetchLists();
+    }, []);
 
     const cleanApiEndpoint = (url = "") => {
         if (!url) return "";
@@ -93,8 +113,8 @@ function EditApiIntegrations() {
 
         return {
             apiDescription: data.name || data.api_description || "",
-            apiType: data.apiType || data.api_type || "Regular API",
-            platform: data.platform || 'custom',
+            apiType: data.apiType || data.api_type || "",
+            platform: data.platform || data.service_provider?.toLowerCase().replace(' ', '_') || 'custom',
             campaignId: data.campaign_id || "",
             apiEndpoint: cleanApiEndpoint(data.apiEndpoint || data.api_endpoint || data.postUrl),
             timeout: data.timeout || data.timeout_after || 60,
@@ -199,7 +219,7 @@ function EditApiIntegrations() {
             <div className="p-0 mt-4 md:mt-0 md:p-10 min-h-screen">
                 <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md">
                     <div className="p-5">
-                        <h2 className="text-md text-primary-dark font-bold">{`${integration?.name}`}</h2>
+                        <h2 className="text-md text-primary-dark font-bold">{integration?.name || integration?.api_description || 'Edit API Integration'}</h2>
                     </div>
 
                     <hr className="border-t border-[#F1F1F4]" />
@@ -267,15 +287,35 @@ function EditApiIntegrations() {
                                 </div>
                             </div>
 
-                            {/* Campaign ID - Show when platform is selected */}
+                            {/* List ID dropdown - Show when platform is selected */}
                             {formik.values.platform && formik.values.platform !== 'custom' && (
                                 <div className='mx-6'>
                                     <CustomTextField
-                                        label="Campaign ID"
+                                        label="List ID"
                                         name="campaignId"
-                                        placeholder="Enter campaign ID"
+                                        isSelect={true}
+                                        options={[
+                                            { label: 'Please Select List', value: '' },
+                                            ...listsDropdown,
+                                        ]}
                                         value={formik.values.campaignId}
-                                        onChange={formik.handleChange}
+                                        onChange={(e) => {
+                                            const selectedId = e.target.value;
+                                            formik.setFieldValue('campaignId', selectedId);
+                                            
+                                            // Auto-update campaignId in postVariables
+                                            if (selectedId && formik.values.postVariables) {
+                                                try {
+                                                    const parsed = JSON.parse(formik.values.postVariables);
+                                                    if ('campaignId' in parsed) {
+                                                        parsed.campaignId = parseInt(selectedId) || selectedId;
+                                                        formik.setFieldValue('postVariables', JSON.stringify(parsed, null, 2));
+                                                    }
+                                                } catch (e) {
+                                                    // Not valid JSON, skip
+                                                }
+                                            }
+                                        }}
                                         onBlur={formik.handleBlur}
                                         error={formik.touched.campaignId ? formik.errors.campaignId : ''}
                                     />
@@ -298,7 +338,7 @@ function EditApiIntegrations() {
                             </div>
 
                             {/* Timeout */}
-                            <div className="mx-6 w-40">
+                            {/* <div className="mx-6 w-40">
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                                     <div className="flex-1">
                                         <CustomTextField
@@ -319,7 +359,7 @@ function EditApiIntegrations() {
                                     </div>
                                     <span className="text-sm mt-1 sm:mt-0">Seconds</span>
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Date Format */}
                             {/* <div className="mx-6">
@@ -337,7 +377,7 @@ function EditApiIntegrations() {
                             </div> */}
 
                             {/* URL Encode */}
-                            <div className="mx-6">
+                            {/* <div className="mx-6">
                                 <CustomTextField
                                     label="URL Encode"
                                     name="urlEncode"
@@ -347,6 +387,55 @@ function EditApiIntegrations() {
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                     error={formik.touched.urlEncode ? formik.errors.urlEncode : ""}
+                                />
+                            </div> */}
+
+                            {/* Country Code toggle */}
+                            <div className='mx-6 flex items-center gap-3 py-1'>
+                                <label className="text-sm font-medium text-gray-700">Country Code</label>
+                                <div
+                                    onClick={() => {
+                                        const newValue = !formik.values.countryCode;
+                                        formik.setFieldValue('countryCode', newValue);
+                                        
+                                        // Update phone in postVariables
+                                        if (formik.values.postVariables) {
+                                            try {
+                                                const parsed = JSON.parse(formik.values.postVariables);
+                                                // Find phone field (mobilePhone, phone, etc.)
+                                                for (const key of Object.keys(parsed)) {
+                                                    const val = String(parsed[key]);
+                                                    if (val.includes('%%phone%%')) {
+                                                        parsed[key] = newValue ? '+1%%phone%%' : '%%phone%%';
+                                                    }
+                                                }
+                                                formik.setFieldValue('postVariables', JSON.stringify(parsed, null, 2));
+                                            } catch (e) {
+                                                // Not valid JSON, skip
+                                            }
+                                        }
+                                    }}
+                                    className="relative w-10 h-5 rounded-full cursor-pointer transition-colors duration-200"
+                                    style={{ backgroundColor: formik.values.countryCode ? '#4f46e5' : '#d1d5db' }}
+                                >
+                                    <div
+                                        className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
+                                        style={{ left: formik.values.countryCode ? '22px' : '2px' }}
+                                    />
+                                </div>
+                                <span className="text-sm text-gray-500">{formik.values.countryCode ? 'Yes' : 'No'}</span>
+                            </div>
+
+                            <div className='mx-6'>
+                                <CustomTextField
+                                    label="Post Variables"
+                                    name="postVariables"
+                                    isTextArea={true}
+                                    placeholder="Enter content"
+                                    value={formik.values.postVariables}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    error={formik.touched.postVariables ? formik.errors.postVariables : ''}
                                 />
                             </div>
 
@@ -400,7 +489,7 @@ function EditApiIntegrations() {
                             </div>
 
                             {/* Field Mapping */}
-                            <div className="mx-6">
+                            {/* <div className="mx-6">
                                 <CustomTextField
                                     label="Field Mappings (JSON)"
                                     name="fieldMapping"
@@ -413,7 +502,7 @@ function EditApiIntegrations() {
                                         formik.touched.fieldMapping ? formik.errors.fieldMapping : ""
                                     }
                                 />
-                            </div>
+                            </div> */}
 
 
                             {/* Save Button */}

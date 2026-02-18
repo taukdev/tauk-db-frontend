@@ -739,9 +739,22 @@ const SendLeadsForm = () => {
         errorMessage = error;
       } else if (error?.message) {
         errorMessage = error.message;
+      } else if (error?.data?.error) {
+        errorMessage = error.data.error;
       } else if (error?.data?.message) {
         errorMessage = error.data.message;
       }
+      
+      // Set error message for form display
+      setErrorMessage(errorMessage);
+      
+      // Log detailed error for debugging
+      console.error("Order creation error details:", {
+        error,
+        errorMessage,
+        platformId: id,
+        payload: mapFormValuesToApiPayload(values)
+      });
       
       // Show more detailed error for enum validation
       if (errorMessage.includes("enum") && errorMessage.includes("order_kind")) {

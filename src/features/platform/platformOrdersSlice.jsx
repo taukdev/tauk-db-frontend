@@ -94,12 +94,32 @@ export const createPlatformOrder = createAsyncThunk(
   async ({ platformId, payload }, { rejectWithValue }) => {
     try {
       const response = await createPlatformOrderApi(platformId, payload);
-      return response?.data || response;
+      
+      // Handle different response structures
+      if (response?.status === "success") {
+        return response.data || response;
+      } else if (response?.data) {
+        return response.data;
+      } else {
+        return response;
+      }
     } catch (error) {
-      // Extract error message and data for better error handling
-      const errorMessage = error.message || "Failed to create platform order";
-      const errorData = error.data || error.response?.data;
-      return rejectWithValue({ message: errorMessage, data: errorData });
+      console.error("Create platform order error:", error);
+      
+      // Extract error message from different possible response structures
+      const errorMessage = 
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to create platform order";
+      
+      const errorData = {
+        message: errorMessage,
+        status: error?.response?.status,
+        data: error?.response?.data
+      };
+      
+      return rejectWithValue(errorData);
     }
   }
 );

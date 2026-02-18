@@ -18,7 +18,6 @@ import {
 // Validation Schema
 const validationSchema = Yup.object({
     name: Yup.string().required("Platform name is required"),
-    company: Yup.string().required("Company name is required"),
     platformType: Yup.string().required("Platform type is required"),
     referrerPercent: Yup.number().typeError("Must be a number"),
 });
@@ -65,7 +64,6 @@ const AddPlatform = () => {
     const formik = useFormik({
         initialValues: {
             name: "",
-            company: "",
             platformType: "",
             phone: "",
             fax: "",
@@ -88,7 +86,6 @@ const AddPlatform = () => {
         onSubmit: async (values) => {
             const payload = {
                 platform_name: values.name,
-                company_name: values.company,
                 platform_type: parseInt(values.platformType),
                 referrer_percent: parseFloat(values.referrerPercent),
             };
@@ -155,7 +152,7 @@ const AddPlatform = () => {
                             </div>
 
                             {/* Company Name */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                            {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                                 <label className="w-full md:w-1/4 text-sm text-neutral">
                                     Company Name
                                 </label>
@@ -170,7 +167,7 @@ const AddPlatform = () => {
                                         error={formik.touched.company ? formik.errors.company : ""}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Platform Type */}
                             <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">

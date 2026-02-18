@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { createApiIntegration } from '../../../features/platform/editApiIntegrationsSlice';
 import { useNavigate, useParams, Link } from 'react-router-dom';
@@ -9,6 +9,7 @@ import CustomTextField from "../../CustomTextField";
 import UnionIcon from "../../../assets/icons/Union-icon.svg";
 import CustomButton from "../../CustomButton";
 import { setBreadcrumbs } from "../../../features/breadcrumb/breadcrumbSlice";
+import { getPlatformPresetsByProviderApi, getListsDropdownApi } from "../../../api/platforms";
 
 const apiTypes = [
   { label: "Regular API", value: "Regular API" },
@@ -26,14 +27,13 @@ const requestTypes = [
 const validationSchema = Yup.object({
   apiDescription: Yup.string().required("API description is required"),
   apiType: Yup.string().required("API type is required"),
-  platform: Yup.string(),
+  platform: Yup.string().required("Platform is required"),
   campaignId: Yup.string(),
   apiEndpoint: Yup.string().required("API endpoint is required"),
   timeout: Yup.number()
     .min(1, "Minimum 1 second")
     .max(60, "Maximum 60 seconds")
     .required("Timeout is required"),
-  // dateFormat: Yup.string().required("Date format is required"),
   urlEncode: Yup.string().required("URL encode is required"),
   requestType: Yup.string().required("Request type is required"),
   successfulResponse: Yup.string(),
@@ -45,7 +45,8 @@ function NewApiIntegrationPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const platform = useSelector((state) => selectPlatformById(state, id));
-
+  const [listsDropdown, setListsDropdown] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
 
   const formik = useFormik({
@@ -53,19 +54,23 @@ function NewApiIntegrationPage() {
       apiDescription: '',
       apiType: 'Regular API',
       platform: 'custom',
+      presetId: '',
       campaignId: '',
       apiEndpoint: '',
       timeout: 60,
       postVariables: '',
+      countryCode: false,
       dateFormat: 'Y-m-d H:i:s',
-      urlEncode: 'No', // Based on payload: url_encode: false
+      urlEncode: 'No',
       requestType: 'POST',
       successfulResponse: '',
-      headers: '{\n  "Content-Type": "application/json"\n}', // JSON string format
+      headers: '{\n  "Content-Type": "application/json"\n}',
       fieldMapping: '',
     },
     validationSchema,
     onSubmit: async (values) => {
+      setIsSubmitting(true);
+      
       // Helper function to capitalize first letter of each word
       const capitalizeServiceProvider = (value) => {
         if (!value) return value;
@@ -107,8 +112,8 @@ function NewApiIntegrationPage() {
         post_variables: parseJsonOrString(values.postVariables),
         field_mappings: values.fieldMapping ? (() => {
           try {
-            return typeof values.fieldMapping === 'string' 
-              ? JSON.parse(values.fieldMapping || "{}") 
+            return typeof values.fieldMapping === 'string'
+              ? JSON.parse(values.fieldMapping || "{}")
               : values.fieldMapping;
           } catch (e) {
             console.error("Error parsing field_mappings:", e);
@@ -123,9 +128,123 @@ function NewApiIntegrationPage() {
       } catch (error) {
         // alert("Failed to create integration: " + error);
         console.error("Failed to create integration:", error);
+      } finally {
+        setIsSubmitting(false);
       }
     },
   });
+
+  // Fetch lists dropdown on mount
+  useEffect(() => {
+    const fetchLists = async () => {
+      try {
+        const response = await getListsDropdownApi();
+        if (response?.data && Array.isArray(response.data)) {
+          setListsDropdown(response.data.map(list => ({
+            label: list.list_name,
+            value: String(list.id),
+          })));
+        }
+      } catch (error) {
+        console.error('Error fetching lists dropdown:', error);
+      }
+    };
+    fetchLists();
+  }, []);
+
+  // Auto-populate fields when platform changes
+  useEffect(() => {
+    if (formik.values.platform && formik.values.platform !== 'custom') {
+      const fetchAndApplyPreset = async () => {
+        try {
+          const response = await getPlatformPresetsByProviderApi(formik.values.platform);
+
+          // Normalize: API returns single object or array
+          let preset = null;
+          if (response?.data) {
+            if (Array.isArray(response.data) && response.data.length > 0) {
+              preset = response.data[0];
+            } else if (typeof response.data === 'object' && response.data !== null && !Array.isArray(response.data)) {
+              preset = response.data;
+            }
+          }
+
+          if (preset) {
+            // Parse headers
+            let headersString = '{\n  "Content-Type": "application/json"\n}';
+            try {
+              if (preset.headers) {
+                headersString = JSON.stringify(JSON.parse(preset.headers), null, 2);
+              }
+            } catch (e) {
+              headersString = preset.headers || headersString;
+            }
+
+            // Parse post_variables
+            let postVarsString = '';
+            try {
+              if (preset.post_variables) {
+                postVarsString = JSON.stringify(JSON.parse(preset.post_variables), null, 2);
+              }
+            } catch (e) {
+              postVarsString = preset.post_variables || '';
+            }
+
+            const currentCampaignId = formik.values.campaignId;
+            const currentCountryCode = formik.values.countryCode;
+
+            let finalPostVars = postVarsString;
+
+            // Apply campaignId if already selected
+            if (currentCampaignId && finalPostVars) {
+              try {
+                const parsed = JSON.parse(finalPostVars);
+                if ('campaignId' in parsed) {
+                  parsed.campaignId = parseInt(currentCampaignId) || currentCampaignId;
+                  finalPostVars = JSON.stringify(parsed, null, 2);
+                }
+              } catch (e) {}
+            }
+
+            // Apply countryCode
+            if (finalPostVars) {
+              try {
+                const parsed = JSON.parse(finalPostVars);
+                for (const key of Object.keys(parsed)) {
+                  const val = String(parsed[key]);
+                  if (val.includes('%%phone%%') || val.includes('+1%%phone%%')) {
+                    parsed[key] = currentCountryCode ? '+1%%phone%%' : '%%phone%%';
+                  }
+                }
+                finalPostVars = JSON.stringify(parsed, null, 2);
+              } catch (e) {}
+            }
+
+            formik.setValues({
+              ...formik.values,
+              apiEndpoint: preset.api_endpoint || '',
+              postVariables: finalPostVars,
+              successfulResponse: preset.successful_response || '',
+              headers: headersString,
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching preset for', formik.values.platform, ':', error);
+        }
+      };
+
+      fetchAndApplyPreset();
+    } else {
+      // Reset fields when Custom is selected
+      formik.setValues({
+        ...formik.values,
+        apiEndpoint: '',
+        postVariables: '',
+        successfulResponse: '',
+        headers: '{\n  "Content-Type": "application/json"\n}',
+      });
+    }
+  }, [formik.values.platform]);
 
   useEffect(() => {
     if (platform) {
@@ -177,7 +296,7 @@ function NewApiIntegrationPage() {
                 />
               </div>
 
-              <div className='mx-6'>
+              {/* <div className='mx-6'>
                 <CustomTextField
                   label="API Type"
                   name="apiType"
@@ -188,7 +307,7 @@ function NewApiIntegrationPage() {
                   onBlur={formik.handleBlur}
                   error={formik.touched.apiType ? formik.errors.apiType : ''}
                 />
-              </div>
+              </div> */}
 
               <hr className="border-t border-[#F1F1F4] mb-2" />
 
@@ -209,7 +328,10 @@ function NewApiIntegrationPage() {
                       { label: 'TaukDial', value: 'taukdial' },
                     ]}
                     value={formik.values.platform}
-                    onChange={formik.handleChange}
+                    onChange={(e) => {
+                      formik.setFieldValue('platform', e.target.value);
+                      formik.setFieldValue('presetId', ''); // Reset preset when platform changes
+                    }}
                     onBlur={formik.handleBlur}
                     error={formik.touched.platform ? formik.errors.platform : ''}
                   />
@@ -220,15 +342,37 @@ function NewApiIntegrationPage() {
                 </div>
               </div>
 
-              {/* Campaign ID - Show when platform is selected */}
+
+
+              {/* List ID dropdown - Show when platform is selected */}
               {formik.values.platform && formik.values.platform !== 'custom' && (
                 <div className='mx-6'>
                   <CustomTextField
-                    label="Campaign ID"
+                    label="List ID"
                     name="campaignId"
-                    placeholder="Enter campaign ID"
+                    isSelect={true}
+                    options={[
+                      { label: 'Please Select List', value: '' },
+                      ...listsDropdown,
+                    ]}
                     value={formik.values.campaignId}
-                    onChange={formik.handleChange}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      formik.setFieldValue('campaignId', selectedId);
+                      
+                      // Auto-update campaignId in postVariables
+                      if (selectedId && formik.values.postVariables) {
+                        try {
+                          const parsed = JSON.parse(formik.values.postVariables);
+                          if ('campaignId' in parsed) {
+                            parsed.campaignId = parseInt(selectedId) || selectedId;
+                            formik.setFieldValue('postVariables', JSON.stringify(parsed, null, 2));
+                          }
+                        } catch (e) {
+                          // Not valid JSON, skip
+                        }
+                      }
+                    }}
                     onBlur={formik.handleBlur}
                     error={formik.touched.campaignId ? formik.errors.campaignId : ''}
                   />
@@ -247,7 +391,7 @@ function NewApiIntegrationPage() {
                 />
               </div>
 
-              <div className="mx-6 w-40">
+              {/* <div className="mx-6 w-40">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                   <div className="flex-1">
                     <CustomTextField
@@ -269,8 +413,44 @@ function NewApiIntegrationPage() {
                   </div>
                   <span className="text-sm mt-1 sm:mt-0">Seconds</span>
                 </div>
-              </div>
+              </div> */}
 
+
+              {/* Country Code toggle */}
+              <div className='mx-6 flex items-center gap-3 py-1'>
+                <label className="text-sm font-medium text-gray-700">Country Code</label>
+                <div
+                  onClick={() => {
+                    const newValue = !formik.values.countryCode;
+                    formik.setFieldValue('countryCode', newValue);
+                    
+                    // Update phone in postVariables
+                    if (formik.values.postVariables) {
+                      try {
+                        const parsed = JSON.parse(formik.values.postVariables);
+                        // Find phone field (mobilePhone, phone, etc.)
+                        for (const key of Object.keys(parsed)) {
+                          const val = String(parsed[key]);
+                          if (val.includes('%%phone%%')) {
+                            parsed[key] = newValue ? '+1%%phone%%' : '%%phone%%';
+                          }
+                        }
+                        formik.setFieldValue('postVariables', JSON.stringify(parsed, null, 2));
+                      } catch (e) {
+                        // Not valid JSON, skip
+                      }
+                    }
+                  }}
+                  className="relative w-10 h-5 rounded-full cursor-pointer transition-colors duration-200"
+                  style={{ backgroundColor: formik.values.countryCode ? '#4f46e5' : '#d1d5db' }}
+                >
+                  <div
+                    className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
+                    style={{ left: formik.values.countryCode ? '22px' : '2px' }}
+                  />
+                </div>
+                <span className="text-sm text-gray-500">{formik.values.countryCode ? 'Yes' : 'No'}</span>
+              </div>
 
               <div className='mx-6'>
                 <CustomTextField
@@ -283,11 +463,11 @@ function NewApiIntegrationPage() {
                   onBlur={formik.handleBlur}
                   error={formik.touched.postVariables ? formik.errors.postVariables : ''}
                 />
-                <div className="text-right mb-1">
+                {/* <div className="text-right mb-1">
                   <button type="button" className="border-b border-primary border-dashed rounded cursor-pointer text-primary text-sm">
                     Add Custom Fields
                   </button>
-                </div>
+                </div> */}
               </div>
 
               {/* <div className='mx-6'>
@@ -302,7 +482,7 @@ function NewApiIntegrationPage() {
                 />
               </div> */}
 
-              <div className='mx-6'>
+              {/* <div className='mx-6'>
                 <CustomTextField
                   label="URL Encode"
                   name="urlEncode"
@@ -313,7 +493,7 @@ function NewApiIntegrationPage() {
                   onBlur={formik.handleBlur}
                   error={formik.touched.urlEncode ? formik.errors.urlEncode : ''}
                 />
-              </div>
+              </div> */}
 
               <div className='mx-6'>
                 <CustomTextField
@@ -355,7 +535,7 @@ function NewApiIntegrationPage() {
                 />
               </div>
 
-              <div className='mx-6'>
+              {/* <div className='mx-6'>
                 <CustomTextField
                   label="Field Mappings (JSON)"
                   name="fieldMapping"
@@ -366,7 +546,7 @@ function NewApiIntegrationPage() {
                   onBlur={formik.handleBlur}
                   error={formik.touched.fieldMapping ? formik.errors.fieldMapping : ''}
                 />
-              </div>
+              </div> */}
 
 
 
@@ -374,8 +554,9 @@ function NewApiIntegrationPage() {
                 type="submit"
                 position="end"
                 className="mt-5 cursor-pointer py-2.5 sm:py-3 text-sm sm:text-base rounded-xl mb-8 mx-6"
+                disabled={isSubmitting}
               >
-                Save New Integration
+                {isSubmitting ? 'Saving...' : 'Save New Integration'}
               </CustomButton>
 
             </form>
