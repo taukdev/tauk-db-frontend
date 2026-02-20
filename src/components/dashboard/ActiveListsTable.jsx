@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Search } from "lucide-react";
 import CustomTextField from "../CustomTextField";
 import tableHeaderIcon from "../../assets/icons/t-header-icon.svg";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 import { setBreadcrumbs } from "../../features/breadcrumb/breadcrumbSlice";
 import SearchBox from "../SearchBox";
 import Pagination from "../common/Pagination";
@@ -131,7 +131,9 @@ function DateRangeDropdown({ onDateRangeChange }) {
 
 const ActiveList = ({ title = "Active Lists" }) => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const vendorsData = useSelector((state) => state.vendors.vendors || []);
+  const vendorsLoading = useSelector((state) => state.vendors.loading);
 
   // Ensure vendors is always an array
   const vendors = Array.isArray(vendorsData) ? vendorsData : [];
@@ -139,13 +141,22 @@ const ActiveList = ({ title = "Active Lists" }) => {
   // State for selected vendor
   const [selectedVendorId, setSelectedVendorId] = useState(null);
 
-  // Initialize selected vendor on mount or when vendors change
+  // Track the location key so we can detect every navigation to this page
+  const prevLocationKeyRef = React.useRef(null);
+
+  // Initialize selected vendor on mount or when vendors change.
+  // Also reset to first vendor on every fresh navigation (new location key).
   useEffect(() => {
-    if (vendors.length > 0 && !selectedVendorId) {
-      // Set first vendor as default
-      setSelectedVendorId(vendors[0]?.id);
+    const isNewNavigation = prevLocationKeyRef.current !== location.key;
+    prevLocationKeyRef.current = location.key;
+
+    if (vendors.length > 0) {
+      if (!selectedVendorId || isNewNavigation) {
+        // Set first vendor as default on mount or when navigating back
+        setSelectedVendorId(vendors[0]?.id);
+      }
     }
-  }, [vendors, selectedVendorId]);
+  }, [vendors, location.key]);
 
   // Get selected vendor object
   const selectedVendor = vendors.find(v => String(v.id) === String(selectedVendorId)) || vendors[0] || null;
@@ -160,7 +171,8 @@ const ActiveList = ({ title = "Active Lists" }) => {
   // Date range state
   const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
 
-  // Fetch vendor lists for selected vendor (random or first) - fetch all, then filter and paginate client-side
+  // Fetch vendor lists whenever vendor, page, rowsPerPage, dateRange changes,
+  // OR when location.key changes (i.e. user navigated back to dashboard)
   useEffect(() => {
     const fetchVendorLists = async () => {
       if (!selectedVendorId) {
@@ -190,6 +202,7 @@ const ActiveList = ({ title = "Active Lists" }) => {
           pagination = res.data.pagination || res.pagination;
         }
 
+        const vendorName = vendors.find(v => String(v.id) === String(selectedVendorId))?.name || "Unknown Vendor";
         const transformedData = rawData.map((item) => ({
           id: item.id,
           name: item.listName || item.list_name || "-",
@@ -199,7 +212,7 @@ const ActiveList = ({ title = "Active Lists" }) => {
             failed: 0,
             skipped: 0,
           },
-          vendorName: selectedVendor?.name || item?.Vendor?.vendor_name || "Unknown Vendor",
+          vendorName: vendorName || item?.Vendor?.vendor_name || "Unknown Vendor",
         }));
 
         setVendorLists(transformedData);
@@ -214,7 +227,7 @@ const ActiveList = ({ title = "Active Lists" }) => {
     };
 
     fetchVendorLists();
-  }, [selectedVendorId, currentPage, rowsPerPage, selectedVendor?.name, dateRange]);
+  }, [selectedVendorId, currentPage, rowsPerPage, dateRange, location.key]);
 
   // get vendor by name or fallback to first vendor
   const getVendorById = (vendorName) => {
@@ -482,7 +495,16 @@ const ActiveList = ({ title = "Active Lists" }) => {
             </thead>
 
             <tbody>
-              {listsLoading && (
+              {/* Show spinner while vendors API is pending */}
+              {vendorsLoading && (
+                <tr>
+                  <td colSpan={6} className="text-center py-6">
+                    <LoadingSpinner text="Loading vendors..." size="md" />
+                  </td>
+                </tr>
+              )}
+
+              {listsLoading && !vendorsLoading && (
                 <tr>
                   <td colSpan={6} className="text-center py-6">
                     <LoadingSpinner text="Loading..." size="md" />
@@ -490,7 +512,7 @@ const ActiveList = ({ title = "Active Lists" }) => {
                 </tr>
               )}
 
-              {!listsLoading && paginatedData.length === 0 && (
+              {!listsLoading && !vendorsLoading && paginatedData.length === 0 && (
                 <tr>
                   <td colSpan={6} className="text-center py-6">
                     {selectedVendorId ? "No lists found for this vendor" : "No vendor selected"}

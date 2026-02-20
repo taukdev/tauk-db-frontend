@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-hot-toast';
 import { createApiIntegration } from '../../../features/platform/editApiIntegrationsSlice';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useFormik } from 'formik';
@@ -21,7 +22,7 @@ const urlEncodeOptions = [
 ];
 const requestTypes = [
   { label: "Post", value: "POST" },
-  { label: "Get", value: "GET" },
+  // { label: "Get", value: "GET" },
 ];
 
 const validationSchema = Yup.object({
@@ -70,7 +71,7 @@ function NewApiIntegrationPage() {
     validationSchema,
     onSubmit: async (values) => {
       setIsSubmitting(true);
-      
+
       // Helper function to capitalize first letter of each word
       const capitalizeServiceProvider = (value) => {
         if (!value) return value;
@@ -124,9 +125,10 @@ function NewApiIntegrationPage() {
 
       try {
         await dispatch(createApiIntegration({ platformId: id, payload })).unwrap();
+        toast.success("API Integration created successfully!");
         navigate(`/platforms/${id}/api-integrations`);
       } catch (error) {
-        // alert("Failed to create integration: " + error);
+        toast.error(error || "Failed to create integration");
         console.error("Failed to create integration:", error);
       } finally {
         setIsSubmitting(false);
@@ -203,7 +205,7 @@ function NewApiIntegrationPage() {
                   parsed.campaignId = parseInt(currentCampaignId) || currentCampaignId;
                   finalPostVars = JSON.stringify(parsed, null, 2);
                 }
-              } catch (e) {}
+              } catch (e) { }
             }
 
             // Apply countryCode
@@ -217,7 +219,7 @@ function NewApiIntegrationPage() {
                   }
                 }
                 finalPostVars = JSON.stringify(parsed, null, 2);
-              } catch (e) {}
+              } catch (e) { }
             }
 
             formik.setValues({
@@ -319,7 +321,7 @@ function NewApiIntegrationPage() {
                     name="platform"
                     isSelect={true}
                     options={[
-                      { label: 'Custom', value: 'custom' },
+                      // { label: 'Custom', value: 'custom' },
                       { label: 'Active Campaign', value: 'active_campaign' },
                       { label: 'Adopia', value: 'adopia' },
                       { label: 'Drip', value: 'drip' },
@@ -359,7 +361,7 @@ function NewApiIntegrationPage() {
                     onChange={(e) => {
                       const selectedId = e.target.value;
                       formik.setFieldValue('campaignId', selectedId);
-                      
+
                       // Auto-update campaignId in postVariables
                       if (selectedId && formik.values.postVariables) {
                         try {
@@ -423,7 +425,7 @@ function NewApiIntegrationPage() {
                   onClick={() => {
                     const newValue = !formik.values.countryCode;
                     formik.setFieldValue('countryCode', newValue);
-                    
+
                     // Update phone in postVariables
                     if (formik.values.postVariables) {
                       try {
@@ -495,7 +497,7 @@ function NewApiIntegrationPage() {
                 />
               </div> */}
 
-              <div className='mx-6'>
+              {/* <div className='mx-6'>
                 <CustomTextField
                   label="Request Type"
                   name="requestType"
@@ -506,7 +508,7 @@ function NewApiIntegrationPage() {
                   onBlur={formik.handleBlur}
                   error={formik.touched.requestType ? formik.errors.requestType : ''}
                 />
-              </div>
+              </div> */}
 
               <div className='mx-6'>
                 <CustomTextField

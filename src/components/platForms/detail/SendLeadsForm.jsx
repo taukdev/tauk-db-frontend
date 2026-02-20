@@ -910,11 +910,11 @@ const SendLeadsForm = () => {
                   name="orderType"
                   isRadio
                   options={[
-                    { label: "Lead File", value: "leadFile" },
+                    // { label: "Lead File", value: "leadFile" },
                     { label: "Live Feed", value: "liveFeed" },
-                    { label: "Priority Order", value: "priority" },
-                    { label: "One-Time Batch Post", value: "batchPost" },
-                    { label: "Bidding Order", value: "bidding" },
+                    // { label: "Priority Order", value: "priority" },
+                    // { label: "One-Time Batch Post", value: "batchPost" },
+                    // { label: "Bidding Order", value: "bidding" },
                   ]}
                   direction="column"
                   value={formik.values.orderType}

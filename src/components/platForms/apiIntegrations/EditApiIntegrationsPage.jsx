@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from 'react-hot-toast';
 import UnionIcon from "../../../assets/icons/Union-icon.svg";
 import { Link, useParams } from "react-router-dom";
 import CustomTextField from "../../CustomTextField";
@@ -21,7 +22,7 @@ const urlEncodeOptions = [
 ];
 const requestTypes = [
     { label: "Post", value: "POST" },
-    { label: "Get", value: "GET" },
+    // { label: "Get", value: "GET" },
 ];
 
 const validationSchema = Yup.object({
@@ -176,8 +177,8 @@ function EditApiIntegrations() {
                 post_variables: parseJsonOrString(values.postVariables),
                 field_mappings: values.fieldMapping ? (() => {
                     try {
-                        return typeof values.fieldMapping === 'string' 
-                            ? JSON.parse(values.fieldMapping || "{}") 
+                        return typeof values.fieldMapping === 'string'
+                            ? JSON.parse(values.fieldMapping || "{}")
                             : values.fieldMapping;
                     } catch (e) {
                         console.error("Error parsing field_mappings:", e);
@@ -193,9 +194,10 @@ function EditApiIntegrations() {
                     payload
                 })).unwrap();
 
+                toast.success("API Integration updated successfully!");
                 navigate(`/platforms/${platformId}/api-integrations`);
             } catch (error) {
-                // alert("Failed to update integration: " + error);
+                toast.error(error || "Failed to update integration");
                 console.error("Failed to update integration:", error);
             }
         },
@@ -267,7 +269,6 @@ function EditApiIntegrations() {
                                         name="platform"
                                         isSelect={true}
                                         options={[
-                                            { label: 'Custom', value: 'custom' },
                                             { label: 'Active Campaign', value: 'active_campaign' },
                                             { label: 'Adopia', value: 'adopia' },
                                             { label: 'Drip', value: 'drip' },
@@ -302,7 +303,7 @@ function EditApiIntegrations() {
                                         onChange={(e) => {
                                             const selectedId = e.target.value;
                                             formik.setFieldValue('campaignId', selectedId);
-                                            
+
                                             // Auto-update campaignId in postVariables
                                             if (selectedId && formik.values.postVariables) {
                                                 try {
@@ -397,7 +398,7 @@ function EditApiIntegrations() {
                                     onClick={() => {
                                         const newValue = !formik.values.countryCode;
                                         formik.setFieldValue('countryCode', newValue);
-                                        
+
                                         // Update phone in postVariables
                                         if (formik.values.postVariables) {
                                             try {
@@ -440,7 +441,7 @@ function EditApiIntegrations() {
                             </div>
 
                             {/* Request Type */}
-                            <div className="mx-6">
+                            {/* <div className="mx-6">
                                 <CustomTextField
                                     label="Request Type"
                                     name="requestType"
@@ -453,7 +454,7 @@ function EditApiIntegrations() {
                                         formik.touched.requestType ? formik.errors.requestType : ""
                                     }
                                 />
-                            </div>
+                            </div> */}
 
                             {/* Successful Response */}
                             <div className="mx-6">

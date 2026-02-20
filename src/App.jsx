@@ -1,6 +1,7 @@
 import './App.css'
 // import './assets/fonts/fonts.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from 'react-hot-toast';
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 // Public components
@@ -49,6 +50,7 @@ import WebhookHistoryReport from './components/reports/WebhookHistoryReport';
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-right" reverseOrder={false} />
       <Routes>
         <Route path="/" element={<LoginComponent />} />
         <Route path="/check-email" element={<CheckEmailComponent />} />

@@ -11,9 +11,10 @@ import { setBreadcrumbs } from "../../../features/breadcrumb/breadcrumbSlice";
 import CustomButton from "../../CustomButton";
 import { fetchApiIntegrations } from "../../../features/platform/apiIntegrationsSlice";
 import { fetchPlatformDetail } from "../../../features/platform/platformDetailSlice";
+import LoadingSpinner from "../../common/LoadingSpinner";
 
 export default function ApiIntegrationPage({ header = "API Integration", showBackIcon = true, }) {
-    const { integrations } = useSelector((state) => state.apiIntegrations);
+    const { integrations, loading } = useSelector((state) => state.apiIntegrations);
     const { id: platformId } = useParams();
 
     // Select from platformDetail slice instead of list slice for better single-item management on refresh
@@ -78,76 +79,85 @@ export default function ApiIntegrationPage({ header = "API Integration", showBac
 
             {/* Integrations */}
             <div className="space-y-4">
-                {integrations.map((item) => (
-                    <div
-                        key={item.id}
-                        className="bg-white rounded-xl border border-[#E1E3EA] p-4 shadow-sm relative min-h-[120px] flex flex-col"
-                    >
-                        {/* Top Row */}
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                            {/* Name + Date */}
-                            <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-[16px] sm:text-[18px] text-primary-dark mb-1 truncate">
-                                    {item.id}. {item.name || item.api_description}
+                {loading && integrations.length === 0 ? (
+                    <div className="flex justify-center items-center py-20">
+                        <LoadingSpinner text="Loading integrations..." size="lg" />
+                    </div>
+                ) : integrations.length === 0 ? (
+                    <div className="text-center py-20 bg-white rounded-xl border border-dashed border-[#E1E3EA]">
+                        <p className="text-secondary">No integrations found.</p>
+                    </div>
+                ) : (
+                    integrations.map((item) => (
+                        <div
+                            key={item.id}
+                            className="bg-white rounded-xl border border-[#E1E3EA] p-4 shadow-sm relative min-h-[120px] flex flex-col"
+                        >
+                            {/* Top Row */}
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                {/* Name + Date */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="font-semibold text-[16px] sm:text-[18px] text-primary-dark mb-1 truncate">
+                                        {item.id}. {item.name || item.api_description}
+                                    </div>
+                                    <div className="text-[12px] sm:text-[13px] text-secondary mb-1">
+                                        Entered on {item.date || item.created_at}
+                                    </div>
                                 </div>
-                                <div className="text-[12px] sm:text-[13px] text-secondary mb-1">
-                                    Entered on {item.date || item.created_at}
-                                </div>
-                            </div>
 
-                            {/* Action Buttons */}
-                            <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:justify-end">
-                                {!item.system && (
-                                    <>
-                                        <Link
-                                            to={`/platforms/${platformId}/edit-api-integration/${item.id}`}
-                                            onClick={() => dispatch(setCurrentIntegration(item))}
-                                        >
-                                            <button className="w-auto px-[8px] py-[4px] flex items-center justify-center cursor-pointer rounded border border-default bg-white hover:bg-gray-100 text-[#6B7280]">
-                                                <img src={EditIcon} alt="Edit" className="w-4 h-4 mr-1" />
-                                                <span className="text-xs">Edit</span>
+                                {/* Action Buttons */}
+                                <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:justify-end">
+                                    {!item.system && (
+                                        <>
+                                            <Link
+                                                to={`/platforms/${platformId}/edit-api-integration/${item.id}`}
+                                                onClick={() => dispatch(setCurrentIntegration(item))}
+                                            >
+                                                <button className="w-auto px-[8px] py-[4px] flex items-center justify-center cursor-pointer rounded border border-default bg-white hover:bg-gray-100 text-[#6B7280]">
+                                                    <img src={EditIcon} alt="Edit" className="w-4 h-4 mr-1" />
+                                                    <span className="text-xs">Edit</span>
+                                                </button>
+                                            </Link>
+
+                                            <button className="w-auto px-[8px] py-[4px] flex items-center justify-center rounded border border-default bg-white hover:bg-gray-100 text-[#6B7280] cursor-pointer">
+                                                <img src={LinkIcon} alt="Test API" className="w-4 h-4 mr-1" />
+                                                <span className="text-xs">Test API</span>
                                             </button>
-                                        </Link>
-
-                                        <button className="w-auto px-[8px] py-[4px] flex items-center justify-center rounded border border-default bg-white hover:bg-gray-100 text-[#6B7280] cursor-pointer">
-                                            <img src={LinkIcon} alt="Test API" className="w-4 h-4 mr-1" />
-                                            <span className="text-xs">Test API</span>
-                                        </button>
-                                    </>
-                                )}
-                                <button className="text-[11px] sm:text-xs px-2 py-1 rounded bg-[#F1F1F4] text-secondary font-medium">
-                                    {item.api_type || "Regular API"}
-                                </button>
-                            </div>
-                        </div>
-
-
-                        {/* Post URL */}
-                        {
-                            (item.api_endpoint || item.postUrl) && (
-                                <div className="mt-3 flex flex-col md:flex-row gap-3 flex-wrap">
-                                    <div className="font-medium text-[13px] sm:text-[14px] text-neutral min-w-[80px]">
-                                        Post URL
-                                    </div>
-                                    <div className="flex-1 min-w-[200px]">
-                                        <textarea
-                                            readOnly
-                                            value={item.api_endpoint || item.postUrl}
-                                            className="w-full border border-[#E1E3EA] rounded-lg p-3 text-xs font-mono resize-none outline-none focus:ring-0"
-                                            rows={1}
-                                            style={{ 
-                                                minHeight: '40px',
-                                                overflowY: 'auto',
-                                                lineHeight: '1.5'
-                                            }}
-                                        />
-                                    </div>
+                                        </>
+                                    )}
+                                    <button className="text-[11px] sm:text-xs px-2 py-1 rounded bg-[#F1F1F4] text-secondary font-medium">
+                                        {item.api_type || "Regular API"}
+                                    </button>
                                 </div>
-                            )
-                        }
+                            </div>
 
-                        {/* Post Variables */}
-                        {/* {
+
+                            {/* Post URL */}
+                            {
+                                (item.api_endpoint || item.postUrl) && (
+                                    <div className="mt-3 flex flex-col md:flex-row gap-3 flex-wrap">
+                                        <div className="font-medium text-[13px] sm:text-[14px] text-neutral min-w-[80px]">
+                                            Post URL
+                                        </div>
+                                        <div className="flex-1 min-w-[200px]">
+                                            <textarea
+                                                readOnly
+                                                value={item.api_endpoint || item.postUrl}
+                                                className="w-full border border-[#E1E3EA] rounded-lg p-3 text-xs font-mono resize-none outline-none focus:ring-0"
+                                                rows={1}
+                                                style={{
+                                                    minHeight: '40px',
+                                                    overflowY: 'auto',
+                                                    lineHeight: '1.5'
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* Post Variables */}
+                            {/* {
                             (item.post_variables || item.postVariables) && (
                                 <div className="mt-3 flex flex-col md:flex-row gap-3 flex-wrap">
                                     <div className="font-medium text-[13px] sm:text-[14px] text-neutral min-w-[80px]">
@@ -184,38 +194,39 @@ export default function ApiIntegrationPage({ header = "API Integration", showBac
                             )
                         } */}
 
-                        {/* Successful Response */}
-                        {
-                            (item.successful_response || item.response) && (
-                                <div className="mt-3 flex flex-col md:flex-row gap-3 flex-wrap">
-                                    <div className="font-medium text-[13px] sm:text-[14px] text-neutral min-w-[80px]">
-                                    </div>
-                                    <div className="flex-1 min-w-[200px]">
-                                        <div className="text-xs text-neutral">
-                                            <span className="font-semibold">Successful Response:</span>{" "}
-                                            {item.successful_response || item.response}
+                            {/* Successful Response */}
+                            {
+                                (item.successful_response || item.response) && (
+                                    <div className="mt-3 flex flex-col md:flex-row gap-3 flex-wrap">
+                                        <div className="font-medium text-[13px] sm:text-[14px] text-neutral min-w-[80px]">
+                                        </div>
+                                        <div className="flex-1 min-w-[200px]">
+                                            <div className="text-xs text-neutral">
+                                                <span className="font-semibold">Successful Response:</span>{" "}
+                                                {item.successful_response || item.response}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )
-                        }
+                                )
+                            }
 
 
-                        {/* System API Notice */}
-                        {
-                            item.system && (
-                                <div className="flex items-center gap-1 text-[12px] text-[#6B7280] bg-transparent mt-2">
-                                    <img
-                                        src={dangerCircleIcon}
-                                        alt="Danger Circle"
-                                        className="w-4 h-4"
-                                    />
-                                    This is a system-generated API. It cannot be modified.
-                                </div>
-                            )
-                        }
-                    </div>
-                ))}
+                            {/* System API Notice */}
+                            {
+                                item.system && (
+                                    <div className="flex items-center gap-1 text-[12px] text-[#6B7280] bg-transparent mt-2">
+                                        <img
+                                            src={dangerCircleIcon}
+                                            alt="Danger Circle"
+                                            className="w-4 h-4"
+                                        />
+                                        This is a system-generated API. It cannot be modified.
+                                    </div>
+                                )
+                            }
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );
