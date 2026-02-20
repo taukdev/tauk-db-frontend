@@ -269,7 +269,7 @@ function EditApiIntegrations() {
                                         name="platform"
                                         isSelect={true}
                                         options={[
-                                            { label: 'Active Campaign', value: 'active_campaign' },
+                                            // { label: 'Active Campaign', value: 'active_campaign' },
                                             { label: 'Adopia', value: 'adopia' },
                                             { label: 'Drip', value: 'drip' },
                                             { label: 'ListFlex', value: 'listflex' },
