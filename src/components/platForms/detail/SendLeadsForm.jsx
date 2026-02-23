@@ -45,7 +45,7 @@ const leadFieldsList = [
 const validationSchema = Yup.object({
   // Only pickLists is required
   pickLists: Yup.array().min(1, "Please select at least one list"),
-  
+
   // All other fields are optional
   orderType: Yup.string().nullable(),
   testPurpose: Yup.bool().nullable(),
@@ -89,7 +89,7 @@ const validationSchema = Yup.object({
       filterType: Yup.string().oneOf(["Include", "Exclude"]).nullable(), // Made optional
     })
   ).nullable(),
-  
+
   disregardLocks: Yup.bool().nullable(),
   dedupeDaysBack: Yup.string().nullable(),
 });
@@ -106,7 +106,7 @@ const SendLeadsForm = () => {
     const options = [
       { label: "Backoffice", value: "backoffice" }
     ];
-    
+
     if (Array.isArray(integrations) && integrations.length > 0) {
       const apiOptions = integrations
         .filter(integration => integration && (integration.id || integration._id)) // Filter out invalid entries
@@ -117,7 +117,7 @@ const SendLeadsForm = () => {
         });
       options.push(...apiOptions);
     }
-    
+
     return options;
   }, [integrations]);
 
@@ -125,6 +125,7 @@ const SendLeadsForm = () => {
   const daysBackOptions = [
     { label: "Select Days Back", value: "" },
     { label: "No Limit", value: "no-limit" },
+    { label: "1 Days", value: "1" },
     { label: "7 Days", value: "7" },
     { label: "14 Days", value: "14" },
     { label: "30 Days", value: "30" },
@@ -157,7 +158,7 @@ const SendLeadsForm = () => {
       try {
         setCountriesLoading(true);
         const response = await getCountriesApi();
-        
+
         // Handle different response structures
         let countriesData = [];
         if (Array.isArray(response)) {
@@ -251,7 +252,7 @@ const SendLeadsForm = () => {
       try {
         setStatesLoading(true);
         const response = await getStatesApi();
-        
+
         // Handle different response structures
         let statesData = [];
         if (Array.isArray(response)) {
@@ -314,7 +315,7 @@ const SendLeadsForm = () => {
       try {
         setListsLoading(true);
         const response = await getListsDropdownApi();
-        
+
         // Handle different response structures
         let listsData = [];
         if (Array.isArray(response)) {
@@ -346,7 +347,7 @@ const SendLeadsForm = () => {
   }, []);
 
   const initialValues = {
-    orderType: "leadFile",
+    orderType: "liveFeed",
     testPurpose: true,
     internalView: true,
     leadsQuantity: "",
@@ -420,20 +421,20 @@ const SendLeadsForm = () => {
   // Helper function to remove null, undefined, and empty string values from payload
   const cleanPayload = (payload) => {
     const cleaned = {};
-  
+
     Object.entries(payload).forEach(([key, value]) => {
       if (value === null || value === undefined || value === "") return;
-  
+
       if (Array.isArray(value) && value.length === 0) return;
-  
+
       if (value === "All") return;
-  
+
       cleaned[key] = value;
     });
-  
+
     return cleaned;
   };
-  
+
 
   // Helper function to map form values to API payload
   const mapFormValuesToApiPayload = (values) => {
@@ -501,48 +502,48 @@ const SendLeadsForm = () => {
       if (values.liveFeedIntegration !== "backoffice") {
         // Try to find integration by ID first, then by name
         const integration = integrations.find(
-          (int) => String(int.id) === String(values.liveFeedIntegration) || 
-                   int.name === values.liveFeedIntegration ||
-                   int.api_description === values.liveFeedIntegration
+          (int) => String(int.id) === String(values.liveFeedIntegration) ||
+            int.name === values.liveFeedIntegration ||
+            int.api_description === values.liveFeedIntegration
         );
         apiIntegrationId = integration?.id || (isNaN(values.liveFeedIntegration) ? null : parseInt(values.liveFeedIntegration, 10));
       }
     } else if (values.orderType === "priority") {
       if (values.priorityIntegration !== "backoffice") {
         const integration = integrations.find(
-          (int) => String(int.id) === String(values.priorityIntegration) || 
-                   int.name === values.priorityIntegration ||
-                   int.api_description === values.priorityIntegration
+          (int) => String(int.id) === String(values.priorityIntegration) ||
+            int.name === values.priorityIntegration ||
+            int.api_description === values.priorityIntegration
         );
         apiIntegrationId = integration?.id || (isNaN(values.priorityIntegration) ? null : parseInt(values.priorityIntegration, 10));
       }
     } else if (values.orderType === "batchPost") {
       if (values.batchPostIntegration !== "backoffice") {
         const integration = integrations.find(
-          (int) => String(int.id) === String(values.batchPostIntegration) || 
-                   int.name === values.batchPostIntegration ||
-                   int.api_description === values.batchPostIntegration
+          (int) => String(int.id) === String(values.batchPostIntegration) ||
+            int.name === values.batchPostIntegration ||
+            int.api_description === values.batchPostIntegration
         );
         apiIntegrationId = integration?.id || (isNaN(values.batchPostIntegration) ? null : parseInt(values.batchPostIntegration, 10));
       }
     } else if (values.orderType === "bidding") {
       if (values.biddingIntegration !== "backoffice") {
         const integration = integrations.find(
-          (int) => String(int.id) === String(values.biddingIntegration) || 
-                   int.name === values.biddingIntegration ||
-                   int.api_description === values.biddingIntegration
+          (int) => String(int.id) === String(values.biddingIntegration) ||
+            int.name === values.biddingIntegration ||
+            int.api_description === values.biddingIntegration
         );
         apiIntegrationId = integration?.id || (isNaN(values.biddingIntegration) ? null : parseInt(values.biddingIntegration, 10));
       }
     }
-    
+
     // If no integration selected and integrations exist, use first one (or set to null if backoffice)
     if (apiIntegrationId === null && integrations.length > 0 && values.orderType !== "leadFile") {
       // Only set default if not explicitly "backoffice"
       const integrationValue = values.orderType === "liveFeed" ? values.liveFeedIntegration :
-                             values.orderType === "priority" ? values.priorityIntegration :
-                             values.orderType === "batchPost" ? values.batchPostIntegration :
-                             values.biddingIntegration;
+        values.orderType === "priority" ? values.priorityIntegration :
+          values.orderType === "batchPost" ? values.batchPostIntegration :
+            values.biddingIntegration;
       if (integrationValue !== "backoffice") {
         apiIntegrationId = integrations[0].id;
       }
@@ -565,20 +566,20 @@ const SendLeadsForm = () => {
     const genderValue = genderArray.length === 0 ? "All" : (genderArray.length === 2 ? ["Male", "Female"] : genderArray);
 
     // Format area codes - convert newlines to commas if needed
-    const areaCodesFormatted = values.areaCodes 
+    const areaCodesFormatted = values.areaCodes
       ? values.areaCodes.replace(/\n/g, ',').replace(/\s+/g, '').replace(/,+/g, ',')
       : null;
 
     // Format zip codes
-    const zipCodesFormatted = values.zipCodes 
+    const zipCodesFormatted = values.zipCodes
       ? values.zipCodes.replace(/\n/g, ',').replace(/\s+/g, '').replace(/,+/g, ',')
       : null;
 
     // Format ESPs with newlines
-    const excludedEspsFormatted = values.excludeIsps 
+    const excludedEspsFormatted = values.excludeIsps
       ? values.excludeIsps.replace(/,/g, '\n')
       : null;
-    const includedEspsFormatted = values.includeIsps 
+    const includedEspsFormatted = values.includeIsps
       ? values.includeIsps.replace(/,/g, '\n')
       : null;
 
@@ -637,8 +638,8 @@ const SendLeadsForm = () => {
       // Gender as array
       gender: genderArray.length > 0 ? genderArray : null,
       // States
-      excluded_states: values.selectedStates && values.selectedStates.length > 0 
-        ? values.selectedStates.join(', ') 
+      excluded_states: values.selectedStates && values.selectedStates.length > 0
+        ? values.selectedStates.join(', ')
         : null,
       exclude_states: values.excludeStates || false,
       // ESPs
@@ -649,8 +650,8 @@ const SendLeadsForm = () => {
       // Custom field filters
       custom_field_filter: customFieldFilter.length > 0 ? customFieldFilter : null,
       // Block domain groups
-      block_domain_groups: values.blockDomainGroups && values.blockDomainGroups.length > 0 
-        ? values.blockDomainGroups 
+      block_domain_groups: values.blockDomainGroups && values.blockDomainGroups.length > 0
+        ? values.blockDomainGroups
         : null,
       // Disregard locks
       disregard_locks: values.disregardLocks || false,
@@ -659,8 +660,8 @@ const SendLeadsForm = () => {
       delivery_start_minute: values.deliveryStartMinute ? parseInt(values.deliveryStartMinute, 10) : null,
       delivery_end_hour: values.deliveryEndHour ? parseInt(values.deliveryEndHour, 10) : null,
       delivery_end_minute: values.deliveryEndMinute ? parseInt(values.deliveryEndMinute, 10) : null,
-      delivery_weekdays: values.deliveryWeekdays && values.deliveryWeekdays.length > 0 
-        ? values.deliveryWeekdays 
+      delivery_weekdays: values.deliveryWeekdays && values.deliveryWeekdays.length > 0
+        ? values.deliveryWeekdays
         : null,
     };
 
@@ -692,7 +693,7 @@ const SendLeadsForm = () => {
       // order_type_category already set above
     }
     // Lead File: No additional fields needed (basic order)
-    
+
     // Add post_status for all order types if not already set
     if (!payload.post_status) {
       payload.post_status = "Paused";
@@ -718,10 +719,10 @@ const SendLeadsForm = () => {
       const payload = mapFormValuesToApiPayload(values);
       console.log('Submitting payload:', payload); // Debug log
       const result = await dispatch(createPlatformOrder({ platformId: id, payload })).unwrap();
-      
+
       // Refresh orders list to show the newly created order
       await dispatch(fetchPlatformOrders(id));
-      
+
       // On success, navigate to confirmation or order detail
       if (result?.id) {
         navigate(`/platform/${id}/orders/${result.id}`);
@@ -730,10 +731,10 @@ const SendLeadsForm = () => {
       }
     } catch (error) {
       console.error("Failed to create order:", error);
-      
+
       // Extract error message from API response
       let errorMessage = "Failed to create order. Please try again.";
-      
+
       // Handle error from Redux thunk (can be string or object)
       if (typeof error === 'string') {
         errorMessage = error;
@@ -744,10 +745,10 @@ const SendLeadsForm = () => {
       } else if (error?.data?.message) {
         errorMessage = error.data.message;
       }
-      
+
       // Set error message for form display
       setErrorMessage(errorMessage);
-      
+
       // Log detailed error for debugging
       console.error("Order creation error details:", {
         error,
@@ -755,7 +756,7 @@ const SendLeadsForm = () => {
         platformId: id,
         payload: mapFormValuesToApiPayload(values)
       });
-      
+
       // Show more detailed error for enum validation
       if (errorMessage.includes("enum") && errorMessage.includes("order_kind")) {
         const orderKindMap = {
@@ -768,7 +769,7 @@ const SendLeadsForm = () => {
         const attemptedValue = orderKindMap[values.orderType] || values.orderType;
         errorMessage = `Invalid order type "${attemptedValue}". The API may not support Bidding Orders. Please try: Lead File, Live Feed, Priority Order, or One-Time Batch Post.`;
       }
-      
+
       alert(errorMessage);
     }
   };
@@ -1073,9 +1074,9 @@ const SendLeadsForm = () => {
                 })()}
               </div>
 
-              <div className="mt-2">
+              {/* <div className="mt-2">
                 <a href="#" className="text-[13px] text-primary underline decoration-dashed underline-offset-4 cursor-pointer">Show Custom Fields</a>
-              </div>
+              </div> */}
 
               {formik.touched.leadFields && formik.errors.leadFields && (
                 <div className="text-xs text-red-500 mt-1">{formik.errors.leadFields}</div>
@@ -1197,7 +1198,7 @@ const SendLeadsForm = () => {
             <div className="flex flex-col md:flex-row gap-4 py-2 px-5 items-center">
               <label>Days Back:</label>
 
-              <div className="">
+              <div className="w-full md:w-48">
                 <CustomTextField
                   id="dedupeDaysBack"
                   name="dedupeDaysBack"
@@ -1211,7 +1212,7 @@ const SendLeadsForm = () => {
                 />
               </div>
             </div>
-{/* 
+            {/* 
             <div className="border-b px-5 border-light py-7">
               <label className="text-[13px] text-primary-dark font-medium block mb-4">How many days back do you want to dedupe?</label>
 
@@ -1473,14 +1474,13 @@ const SendLeadsForm = () => {
 
             {/* Submit Button */}
             <div className="flex justify-end mr-6 mt-0">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={creating}
-                className={`px-3 py-3 bg-gradient-primary text-white rounded-xl transition text-sm sm:text-base w-full md:w-auto font-semibold shadow-md ${
-                  creating 
-                    ? "opacity-50 cursor-not-allowed" 
+                className={`px-3 py-3 bg-gradient-primary text-white rounded-xl transition text-sm sm:text-base w-full md:w-auto font-semibold shadow-md ${creating
+                    ? "opacity-50 cursor-not-allowed"
                     : "cursor-pointer hover:opacity-90"
-                }`}
+                  }`}
               >
                 {creating ? "Creating Order..." : "Save Lead"}
               </button>
