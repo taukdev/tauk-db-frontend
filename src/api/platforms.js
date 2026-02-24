@@ -137,6 +137,12 @@ export async function deleteApiIntegrationApi(platformId, integrationId) {
     return await apiJson(`${PLATFORM_PATH}/${platformId}/api-integration/${integrationId}`, { method: "DELETE" });
 }
 
+export async function getActivePlatformPresetsApi() {
+    return await apiJson('/platform-presets/active', {
+        method: "GET",
+    });
+}
+
 /**
  * Fetch platform presets by provider
  * @param {string} serviceProvider - Service provider name

@@ -10,20 +10,10 @@ import CustomTextField from "../../CustomTextField";
 import UnionIcon from "../../../assets/icons/Union-icon.svg";
 import CustomButton from "../../CustomButton";
 import { setBreadcrumbs } from "../../../features/breadcrumb/breadcrumbSlice";
-import { getPlatformPresetsByProviderApi, getListsDropdownApi } from "../../../api/platforms";
+import { getPlatformPresetsByProviderApi, getListsDropdownApi, getActivePlatformPresetsApi } from "../../../api/platforms";
+import LoadingSpinner from "../../common/LoadingSpinner";
 
-const apiTypes = [
-  { label: "Regular API", value: "Regular API" },
-  // { label: "Ping/Post", value: "Ping/Post" },
-];
-const urlEncodeOptions = [
-  { label: "Yes", value: "Yes" },
-  { label: "No", value: "No" },
-];
-const requestTypes = [
-  { label: "Post", value: "POST" },
-  // { label: "Get", value: "GET" },
-];
+
 
 const validationSchema = Yup.object({
   apiDescription: Yup.string().required("API description is required"),
@@ -48,6 +38,8 @@ function NewApiIntegrationPage() {
   const platform = useSelector((state) => selectPlatformById(state, id));
   const [listsDropdown, setListsDropdown] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [platformOptions, setPlatformOptions] = useState([]);
+  const [platformsLoading, setPlatformsLoading] = useState(true);
   const dispatch = useDispatch();
 
   const formik = useFormik({
@@ -170,6 +162,50 @@ function NewApiIntegrationPage() {
       }
     };
     fetchLists();
+  }, []);
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        setPlatformsLoading(true);
+        const response = await getActivePlatformPresetsApi();
+        let data = [];
+        if (Array.isArray(response)) data = response;
+        else if (Array.isArray(response?.data)) data = response.data;
+        else if (Array.isArray(response?.data?.presets)) data = response.data.presets;
+        const seen = new Set();
+        const options = data
+          .map(preset => {
+            const label = preset.platform_name || preset.preset_name || preset.name;
+            const value = preset.service_provider || preset.provider || preset.platform || preset.id;
+            return label && value ? { label: String(label), value: String(value) } : null;
+          })
+          .filter(opt => {
+            if (!opt) return false;
+            const key = `${opt.label}|${opt.value}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+        setPlatformOptions(options);
+        const currentPlatformName = (platform?.name || platform?.platform_name || '').trim();
+        let defaultValue = options.length > 0 ? options[0].value : '';
+        if (currentPlatformName) {
+          const match = options.find(o => o.label.trim().toLowerCase() === currentPlatformName.toLowerCase());
+          if (match) {
+            defaultValue = match.value;
+          }
+        }
+        if (!formik.values.platform || formik.values.platform === 'custom') {
+          formik.setFieldValue('platform', defaultValue);
+        }
+      } catch (error) {
+        setPlatformOptions([]);
+      } finally {
+        setPlatformsLoading(false);
+      }
+    };
+    fetchProviders();
   }, []);
 
   // Auto-populate fields when platform changes
@@ -360,29 +396,27 @@ function NewApiIntegrationPage() {
               <hr className="border-t border-[#F1F1F4] mb-2" />
 
               {/* Platform Selection */}
-              <div className='mx-6 flex flex-col md:flex-row md:items-center gap-3'>
+                <div className='mx-6 flex flex-col md:flex-row md:items-center gap-3'>
                 <div className='md:w-[200px]'>
-                  <CustomTextField
-                    label="Platform"
-                    name="platform"
-                    isSelect={true}
-                    options={[
-                      // { label: 'Custom', value: 'custom' },
-                      // { label: 'Active Campaign', value: 'active_campaign' },
-                      { label: 'Adopia', value: 'adopia' },
-                      { label: 'Drip', value: 'drip' },
-                      { label: 'ListFlex', value: 'listflex' },
-                      { label: 'Daily Story', value: 'daily_story' },
-                      { label: 'TaukDial', value: 'taukdial' },
-                    ]}
-                    value={formik.values.platform}
-                    onChange={(e) => {
-                      formik.setFieldValue('platform', e.target.value);
-                      formik.setFieldValue('presetId', ''); // Reset preset when platform changes
-                    }}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.platform ? formik.errors.platform : ''}
-                  />
+                  {platformsLoading && platformOptions.length === 0 ? (
+                    <div className="py-2">
+                      <LoadingSpinner text="Loading platforms..." size="md" />
+                    </div>
+                  ) : (
+                    <CustomTextField
+                      label="Platform"
+                      name="platform"
+                      isSelect={true}
+                      options={platformOptions}
+                      value={formik.values.platform}
+                      onChange={(e) => {
+                        formik.setFieldValue('platform', e.target.value);
+                        formik.setFieldValue('presetId', '');
+                      }}
+                      onBlur={formik.handleBlur}
+                      error={formik.touched.platform ? formik.errors.platform : ''}
+                    />
+                  )}
                 </div>
 
                 <div className="text-xs text-gray-500 mb-2 pt-0 md:pt-2">
