@@ -143,10 +143,10 @@ export async function deleteApiIntegrationApi(platformId, integrationId) {
  * @returns {Promise} API response
  */
 export async function getPlatformPresetsByProviderApi(serviceProvider) {
-    const url = serviceProvider 
+    const url = serviceProvider
         ? `/platform-presets/by-provider?service_provider=${serviceProvider}`
         : '/platform-presets/by-provider';
-    
+
     return await apiJson(url, {
         method: "GET",
     });

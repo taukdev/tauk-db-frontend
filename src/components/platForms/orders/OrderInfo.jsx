@@ -168,9 +168,9 @@ const OrderInfo = ({ orderDetails }) => {
         </div>
 
         {/* Order Notes */}
-        <div className="flex flex-col md:flex-row items-start md:items-start gap-2 md:gap-4">
+        {/* <div className="flex flex-col md:flex-row items-start md:items-start gap-2 md:gap-4">
           <label className="w-full md:w-1/4 text-[13px] text-neutral font-medium">
-            Order Notes
+            Order Notes 
           </label>
           <div className="w-full md:w-3/4">
             <CustomTextField
@@ -184,7 +184,7 @@ const OrderInfo = ({ orderDetails }) => {
               size="md"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Internal View Only (replaced with CustomTextField isRadio) */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center ">
@@ -207,7 +207,7 @@ const OrderInfo = ({ orderDetails }) => {
         </div>
 
         {/* Leads Delivered */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center ">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center ">
           <label className="w-full sm:w-1/3 md:w-1/4 text-[13px] text-neutral font-medium ">
             Leads Delivered
           </label>
@@ -221,10 +221,10 @@ const OrderInfo = ({ orderDetails }) => {
               className="w-full p-0 md:p-2 text-[13px] rounded-lg text-primary-dark"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Price Per Lead */}
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+        {/* <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
           <label className="w-full md:w-1/4 text-sm text-neutral font-medium">
             Price Per Lead
           </label>
@@ -240,7 +240,7 @@ const OrderInfo = ({ orderDetails }) => {
               error={formik.touched.pricePerLead ? formik.errors.pricePerLead : ""}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Dedupe Back Days */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center ">
@@ -258,7 +258,7 @@ const OrderInfo = ({ orderDetails }) => {
         </div>
 
         {/* Date Seeded */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center ">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center ">
           <label className="w-full sm:w-1/3 md:w-1/4 text-[13px] text-neutral font-medium ">
             Date Seeded
           </label>
@@ -268,7 +268,7 @@ const OrderInfo = ({ orderDetails }) => {
               <span className="text-[13px] text-primary-dark font-medium">This feature is not enabled</span>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Field Selection Type */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center ">
@@ -301,7 +301,7 @@ const OrderInfo = ({ orderDetails }) => {
         </div>
 
         {/* Countries */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center ">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center ">
           <label className="w-full sm:w-1/3 md:w-1/4 text-[13px] text-neutral font-medium ">
             Countries
           </label>
@@ -313,10 +313,10 @@ const OrderInfo = ({ orderDetails }) => {
               className="w-full p-0 md:p-2 text-[13px] rounded-lg text-primary-dark"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Area Codes */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center ">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center ">
           <label className="w-full sm:w-1/3 md:w-1/4 text-[13px] text-neutral font-medium ">
             Area Codes
           </label>
@@ -328,10 +328,10 @@ const OrderInfo = ({ orderDetails }) => {
               className="w-full p-0 md:p-2 text-[13px] rounded-lg text-primary-dark"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Gender */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center ">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center ">
           <label className="w-full sm:w-1/3 md:w-1/4 text-[13px] text-neutral font-medium ">
             Gender
           </label>
@@ -343,10 +343,10 @@ const OrderInfo = ({ orderDetails }) => {
               className="w-full p-0 md:p-2 text-[13px] rounded-lg text-primary-dark"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Offer URL */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center ">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center ">
           <label className="w-full sm:w-1/3 md:w-1/4 text-[13px] text-neutral font-medium ">
             Offer URL
           </label>
@@ -358,10 +358,10 @@ const OrderInfo = ({ orderDetails }) => {
               className="w-full p-0 md:p-2 text-[13px] rounded-lg text-primary-dark"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Lists */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-start ">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-start ">
           <label className="w-full sm:w-1/3 md:w-1/4 text-[13px] text-neutral font-medium ">
             Lists
           </label>
@@ -378,10 +378,10 @@ const OrderInfo = ({ orderDetails }) => {
               )}
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Disregard Locks */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center ">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center ">
           <label className="w-full sm:w-1/3 md:w-1/4 text-[13px] text-neutral font-medium ">
             Disregard Locks
           </label>
@@ -393,10 +393,10 @@ const OrderInfo = ({ orderDetails }) => {
               className="w-full p-0 md:p-2 text-[13px] rounded-lg text-primary-dark"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Excluded States / Selected States */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-start ">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-start ">
           <label className="w-full sm:w-1/3 md:w-1/4 text-[13px] text-neutral font-medium ">
             {orderDetails.excludeStates ? "Excluded States" : "Selected States"}
           </label>
@@ -442,10 +442,10 @@ const OrderInfo = ({ orderDetails }) => {
               return <div className="text-[13px] text-gray-500">N/A</div>;
             })()}
           </div>
-        </div>
+        </div> */}
 
         {/* Excluded ESPs */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center ">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center ">
           <label className="w-full sm:w-1/3 md:w-1/4 text-[13px] text-neutral font-medium ">
             Excluded ESPs
           </label>
@@ -457,10 +457,10 @@ const OrderInfo = ({ orderDetails }) => {
               className="w-full p-0 md:p-2 text-[13px] rounded-lg text-primary-dark"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Included ESPs */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center ">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center ">
           <label className="w-full sm:w-1/3 md:w-1/4 text-[13px] text-neutral font-medium ">
             Included ESPs
           </label>
@@ -472,7 +472,7 @@ const OrderInfo = ({ orderDetails }) => {
               className="w-full p-0 md:p-2 text-[13px] rounded-lg text-primary-dark"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Import Dates */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center ">

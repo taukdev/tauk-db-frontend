@@ -48,6 +48,8 @@ function EditApiIntegrations() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [listsDropdown, setListsDropdown] = useState([]);
+    const [lastListId, setLastListId] = useState('');
+    const [isFirstListIdSet, setIsFirstListIdSet] = useState(false);
 
     // Get all integrations from redux
     const integrations = useSelector((state) => state.apiIntegrations.integrations || []);
@@ -160,6 +162,27 @@ function EditApiIntegrations() {
                 }
             };
 
+            const processPlaceholders = (text) => {
+                if (!text) return text;
+                let processedText = text;
+
+                // Replace %%CampaignID%% (case-insensitive)
+                processedText = processedText.replace(/%%+CampaignID%%+/gi, values.campaignId || '');
+
+                // Replace %%CountryCode%% (case-insensitive)
+                const countryCodeValue = values.countryCode ? '+1' : '';
+                processedText = processedText.replace(/%%+CountryCode%%+/gi, countryCodeValue);
+
+                return processedText;
+            };
+
+            // For phone patterns like +1%%phone%% -> %%phone%%
+            const processPhone = (text) => {
+                if (!text) return text;
+                const isCountryCode = values.countryCode === true || values.countryCode === 'Yes';
+                return text.replace(/(\+1)?%%phone%%/gi, isCountryCode ? '+1%%phone%%' : '%%phone%%');
+            };
+
             const payload = {
                 api_description: values.apiDescription,
                 api_type: values.apiType,
@@ -171,10 +194,10 @@ function EditApiIntegrations() {
                 request_type: values.requestType.toUpperCase(),
                 data_format: "json", // Based on payload structure, default to "json"
                 url_encode: values.urlEncode === "Yes",
-                date_format: values.dateFormat || "Y-m-d H:i:s",
+                date_format: values.dateFormat || values.date_format || "Y-m-d H:i:s",
                 successful_response: values.successfulResponse || null,
-                headers: parseJsonOrString(values.headers),
-                post_variables: parseJsonOrString(values.postVariables),
+                headers: processPlaceholders(parseJsonOrString(values.headers)),
+                post_variables: processPlaceholders(parseJsonOrString(values.postVariables)),
                 field_mappings: values.fieldMapping ? (() => {
                     try {
                         return typeof values.fieldMapping === 'string'
@@ -202,6 +225,58 @@ function EditApiIntegrations() {
             }
         },
     });
+
+    // Live replacement logic for postVariables
+    useEffect(() => {
+        if (formik.values.campaignId && formik.values.postVariables) {
+            let text = formik.values.postVariables;
+            const newId = formik.values.campaignId;
+
+            // 1. Try to replace original placeholder (case-insensitive)
+            if (/%%+CampaignID%%+/gi.test(text)) {
+                text = text.replace(/%%+CampaignID%%+/gi, newId);
+                setIsFirstListIdSet(true);
+            }
+            // 2. If already replaced once, swap the old ID with the new one
+            else if (isFirstListIdSet && lastListId && text.includes(lastListId)) {
+                text = text.split(lastListId).join(newId);
+            }
+
+            if (text !== formik.values.postVariables) {
+                formik.setFieldValue('postVariables', text);
+            }
+            setLastListId(newId);
+        }
+    }, [formik.values.campaignId]);
+
+    useEffect(() => {
+        if (formik.values.postVariables) {
+            let text = formik.values.postVariables;
+            const isCountryCode = formik.values.countryCode === true || formik.values.countryCode === 'Yes';
+
+            // Case 1: Simple placeholder replacement
+            if (/%%+CountryCode%%+/gi.test(text)) {
+                text = text.replace(/%%+CountryCode%%+/gi, isCountryCode ? '+1' : '');
+            }
+
+            // Case 2: Standard phone anchor replacement
+            if (isCountryCode) {
+                if (!text.includes('+1%%phone%%') && /%%phone%%/gi.test(text)) {
+                    text = text.replace(/%%phone%%/gi, '+1%%phone%%');
+                }
+            } else {
+                // If "No", remove any +1 prefix attached to phone
+                const messyPhoneRegex = /\+1[^a-zA-Z0-9]*%%phone%%/gi;
+                if (messyPhoneRegex.test(text)) {
+                    text = text.replace(messyPhoneRegex, '%%phone%%');
+                }
+            }
+
+            if (text !== formik.values.postVariables) {
+                formik.setFieldValue('postVariables', text);
+            }
+        }
+    }, [formik.values.countryCode]);
 
     return (
         <>
@@ -301,21 +376,7 @@ function EditApiIntegrations() {
                                         ]}
                                         value={formik.values.campaignId}
                                         onChange={(e) => {
-                                            const selectedId = e.target.value;
-                                            formik.setFieldValue('campaignId', selectedId);
-
-                                            // Auto-update campaignId in postVariables
-                                            if (selectedId && formik.values.postVariables) {
-                                                try {
-                                                    const parsed = JSON.parse(formik.values.postVariables);
-                                                    if ('campaignId' in parsed) {
-                                                        parsed.campaignId = parseInt(selectedId) || selectedId;
-                                                        formik.setFieldValue('postVariables', JSON.stringify(parsed, null, 2));
-                                                    }
-                                                } catch (e) {
-                                                    // Not valid JSON, skip
-                                                }
-                                            }
+                                            formik.setFieldValue('campaignId', e.target.value);
                                         }}
                                         onBlur={formik.handleBlur}
                                         error={formik.touched.campaignId ? formik.errors.campaignId : ''}
@@ -398,23 +459,6 @@ function EditApiIntegrations() {
                                     onClick={() => {
                                         const newValue = !formik.values.countryCode;
                                         formik.setFieldValue('countryCode', newValue);
-
-                                        // Update phone in postVariables
-                                        if (formik.values.postVariables) {
-                                            try {
-                                                const parsed = JSON.parse(formik.values.postVariables);
-                                                // Find phone field (mobilePhone, phone, etc.)
-                                                for (const key of Object.keys(parsed)) {
-                                                    const val = String(parsed[key]);
-                                                    if (val.includes('%%phone%%')) {
-                                                        parsed[key] = newValue ? '+1%%phone%%' : '%%phone%%';
-                                                    }
-                                                }
-                                                formik.setFieldValue('postVariables', JSON.stringify(parsed, null, 2));
-                                            } catch (e) {
-                                                // Not valid JSON, skip
-                                            }
-                                        }
                                     }}
                                     className="relative w-10 h-5 rounded-full cursor-pointer transition-colors duration-200"
                                     style={{ backgroundColor: formik.values.countryCode ? '#4f46e5' : '#d1d5db' }}

@@ -9,7 +9,7 @@ const PriorityOrderForm = ({ formik, integrationOptions = [] }) => {
     { label: "Integration 1", value: "integration1" },
     { label: "Integration 2", value: "integration2" },
   ];
-  
+
   const options = integrationOptions.length > 0 ? integrationOptions : defaultOptions;
 
   // Post Status options

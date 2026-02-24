@@ -66,7 +66,7 @@ const DailyDeliveryBreakdown = ({ dailyBreakdown, loading }) => {
 
   return (
     <div className="bg-white border border-[#E4E6EF] rounded-custom-lg shadow-sm">
-      {/* Header */}
+
       <div className="flex flex-col sm:flex-row justify-between items-center p-4 gap-3">
         <h2 className="text-sm font-semibold text-black">
           Daily Delivery Breakdown
@@ -85,7 +85,7 @@ const DailyDeliveryBreakdown = ({ dailyBreakdown, loading }) => {
         </div>
       </div>
 
-      {/* Table */}
+
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-sm">
           <thead>
@@ -137,7 +137,7 @@ const DailyDeliveryBreakdown = ({ dailyBreakdown, loading }) => {
         </table>
       </div>
 
-      {/* Pagination */}
+
       <div className="flex flex-col sm:flex-row justify-between items-center px-5 py-4 text-sm text-secondary gap-3">
         {/* Rows per page */}
         <div className="flex items-center gap-2 order-2 sm:order-1">

@@ -470,7 +470,7 @@ const SendLeadsForm = () => {
 
     // Map lead fields from display names to API field names
     const fieldNameMap = {
-      "Email Address": "email_address",
+      "Email Address": "email",
       "First Name": "first_name",
       "Last Name": "last_name",
       "Phone Number": "phone_number",
@@ -1478,11 +1478,11 @@ const SendLeadsForm = () => {
                 type="submit"
                 disabled={creating}
                 className={`px-3 py-3 bg-gradient-primary text-white rounded-xl transition text-sm sm:text-base w-full md:w-auto font-semibold shadow-md ${creating
-                    ? "opacity-50 cursor-not-allowed"
-                    : "cursor-pointer hover:opacity-90"
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer hover:opacity-90"
                   }`}
               >
-                {creating ? "Creating Order..." : "Save Lead"}
+                {creating ? "Creating Order..." : "Send Lead"}
               </button>
             </div>
           </form>

@@ -1,18 +1,13 @@
-import React from "react";
-import { useFormik } from "formik";
+
+import { useSelector } from "react-redux";
 import CustomTextField from "../../../CustomTextField";
 import DatePickerField from "../../../DatePickerField";
-import { ChevronDown } from "lucide-react";
+
+import LoadingSpinner from "../../../common/LoadingSpinner";
 
 const LiveFeedForm = ({ formik, integrationOptions = [] }) => {
-  // Use provided integration options or fallback to default
-  const defaultOptions = [
-    { label: "Backoffice", value: "backoffice" },
-    { label: "Integration 1", value: "integration1" },
-    { label: "Integration 2", value: "integration2" },
-  ];
-  
-  const options = integrationOptions.length > 0 ? integrationOptions : defaultOptions;
+  const { loading } = useSelector((state) => state.apiIntegrations || { loading: false });
+  const options = (integrationOptions || []).filter((opt) => opt.value !== "backoffice");
 
   // When Leads Turn options (in hours)
   const leadTurnOptions = Array.from({ length: 25 }, (_, i) => ({
@@ -46,19 +41,22 @@ const LiveFeedForm = ({ formik, integrationOptions = [] }) => {
               Pick Integration
             </label>
             <div className="md:flex-1">
-              <CustomTextField
-                name="liveFeedIntegration"
-                isSelect
-                options={options}
-                value={
-                  formik.values.liveFeedIntegration ||
-                  options[0].value
-                }
-                onChange={(e) =>
-                  formik.setFieldValue("liveFeedIntegration", e.target.value)
-                }
-                className="mb-0"
-              />
+              {loading && options.length === 0 ? (
+                <div className="py-2">
+                  <LoadingSpinner text="Loading integrations..." size="md" />
+                </div>
+              ) : (
+                <CustomTextField
+                  name="liveFeedIntegration"
+                  isSelect
+                  options={options}
+                  value={formik.values.liveFeedIntegration || ""}
+                  onChange={(e) =>
+                    formik.setFieldValue("liveFeedIntegration", e.target.value)
+                  }
+                  className="mb-0"
+                />
+              )}
             </div>
           </div>
 
@@ -202,12 +200,10 @@ const LiveFeedForm = ({ formik, integrationOptions = [] }) => {
                   background: `linear-gradient(
         to right,
         #1F6FEB 0%,
-        #1F6FEB ${
-          ((formik.values.liveFeedDelayBetweenPosts || 0) / 3600) * 100
-        }%,
-        #e5e7eb ${
-          ((formik.values.liveFeedDelayBetweenPosts || 0) / 3600) * 100
-        }%,
+        #1F6FEB ${((formik.values.liveFeedDelayBetweenPosts || 0) / 3600) * 100
+                    }%,
+        #e5e7eb ${((formik.values.liveFeedDelayBetweenPosts || 0) / 3600) * 100
+                    }%,
         #e5e7eb 100%
       )`,
                 }}
