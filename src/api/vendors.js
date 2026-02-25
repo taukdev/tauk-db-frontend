@@ -191,7 +191,10 @@ export async function getVendorListsApi(
   page = 1,
   limit = 10,
   vendorId = null,
-  listStatus = null
+  listStatus = null,
+  listVerticalId = null,
+  startDate = null,
+  endDate = null
 ) {
   const queryParams = new URLSearchParams({
     page: page.toString(),
@@ -207,6 +210,19 @@ export async function getVendorListsApi(
   // listStatus together with vendorId.
   if (listStatus) {
     queryParams.append("list_status", listStatus.toString());
+  }
+
+  // Optional vertical filter
+  if (listVerticalId) {
+    queryParams.append("list_vertical", listVerticalId.toString());
+  }
+
+  // Optional date range filters
+  if (startDate) {
+    queryParams.append("start_date", String(startDate));
+  }
+  if (endDate) {
+    queryParams.append("end_date", String(endDate));
   }
 
   return await apiJson(`${GET_VENDOR_LISTS_PATH}?${queryParams}`, {

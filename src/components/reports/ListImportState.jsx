@@ -187,7 +187,7 @@ const ListImportState = () => {
                 <h3 className="text-base sm:text-lg font-semibold text-primary-dark mb-3 sm:mb-4">
                   Summary
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4">
                   <div className="text-center sm:text-left">
                     <p className="text-xs sm:text-sm text-gray-600 mb-1 font-bold uppercase">TOTAL LEADS</p>
                     <p className="text-lg sm:text-xl font-bold text-primary-dark">
@@ -204,6 +204,12 @@ const ListImportState = () => {
                     <p className="text-xs sm:text-sm text-gray-600 mb-1 font-bold">Total Buyers</p>
                     <p className="text-lg sm:text-xl font-bold text-primary-dark">
                       {reportData.summary.total_buyers || reportData.summary.buyers || 0}
+                    </p>
+                  </div>
+                  <div className="text-center sm:text-left">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1 font-bold">Total Declines</p>
+                    <p className="text-lg sm:text-xl font-bold text-primary-dark">
+                      {reportData.summary.total_declines || reportData.summary.declines || 0}
                     </p>
                   </div>
                 </div>
@@ -308,7 +314,7 @@ const ListImportState = () => {
                   <h3 className="text-base sm:text-lg font-semibold text-primary-dark mb-3 sm:mb-4">
                     Daily Breakdown
                   </h3>
-                  {/* Mobile Card View */}
+            
                   <div className="block md:hidden space-y-3">
                     {reportData.daily_breakdown.map((day, index) => (
                       <div
@@ -337,7 +343,7 @@ const ListImportState = () => {
                       </div>
                     ))}
                   </div>
-                  {/* Desktop Table View */}
+           
                   <div className="hidden md:block overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6">
                     <table className="min-w-full border border-gray-200">
                       <thead className="bg-gray-50">

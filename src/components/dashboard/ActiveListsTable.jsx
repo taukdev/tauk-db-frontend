@@ -10,7 +10,7 @@ import SearchBox from "../SearchBox";
 import Pagination from "../common/Pagination";
 // <-- import the shared Checkbox component
 import Checkbox from "../common/Checkbox";
-import { getVendorListsApi } from "../../api/vendors";
+import { getVendorListsApi, getListVerticalApi } from "../../api/vendors";
 import LoadingSpinner from "../common/LoadingSpinner";
 import DatePickerField from "../DatePickerField";
 
@@ -129,7 +129,7 @@ function DateRangeDropdown({ onDateRangeChange }) {
   );
 }
 
-const ActiveList = ({ title = "Active Lists" }) => {
+const ActiveList = ({ title = "Active Lists", dateRange, onDateRangeChange, selectedLeadTypeId, onLeadTypeChange }) => {
   const dispatch = useDispatch();
   const location = useLocation();
   const vendorsData = useSelector((state) => state.vendors.vendors || []);
@@ -141,25 +141,8 @@ const ActiveList = ({ title = "Active Lists" }) => {
   // State for selected vendor
   const [selectedVendorId, setSelectedVendorId] = useState(null);
 
-  // Track the location key so we can detect every navigation to this page
-  const prevLocationKeyRef = React.useRef(null);
-
-  // Initialize selected vendor on mount or when vendors change.
-  // Also reset to first vendor on every fresh navigation (new location key).
-  useEffect(() => {
-    const isNewNavigation = prevLocationKeyRef.current !== location.key;
-    prevLocationKeyRef.current = location.key;
-
-    if (vendors.length > 0) {
-      if (!selectedVendorId || isNewNavigation) {
-        // Set first vendor as default on mount or when navigating back
-        setSelectedVendorId(vendors[0]?.id);
-      }
-    }
-  }, [vendors, location.key]);
-
   // Get selected vendor object
-  const selectedVendor = vendors.find(v => String(v.id) === String(selectedVendorId)) || vendors[0] || null;
+  const selectedVendor = vendors.find(v => String(v.id) === String(selectedVendorId)) || null;
 
   // State for vendor lists
   const [vendorLists, setVendorLists] = useState([]);
@@ -168,23 +151,56 @@ const ActiveList = ({ title = "Active Lists" }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
 
-  // Date range state
-  const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
+  // Lead types (verticals) from API
+  const [leadTypes, setLeadTypes] = useState([]);
+  const [leadTypesLoading, setLeadTypesLoading] = useState(false);
+  const [leadTypesError, setLeadTypesError] = useState(null);
+
+  // Fetch lead types (list verticals) on mount
+  useEffect(() => {
+    let mounted = true;
+    const fetchLeadTypes = async () => {
+      try {
+        setLeadTypesLoading(true);
+        setLeadTypesError(null);
+        const res = await getListVerticalApi();
+        let items = [];
+        if (Array.isArray(res)) {
+          items = res;
+        } else if (Array.isArray(res?.data)) {
+          items = res.data;
+        } else if (Array.isArray(res?.data?.data)) {
+          items = res.data.data;
+        }
+        if (mounted) setLeadTypes(items);
+      } catch (e) {
+        if (mounted) setLeadTypesError(e?.message || "Failed to load lead types");
+      } finally {
+        if (mounted) setLeadTypesLoading(false);
+      }
+    };
+    fetchLeadTypes();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Fetch vendor lists whenever vendor, page, rowsPerPage, dateRange changes,
   // OR when location.key changes (i.e. user navigated back to dashboard)
   useEffect(() => {
     const fetchVendorLists = async () => {
-      if (!selectedVendorId) {
-        setVendorLists([]);
-        setTotalItems(0);
-        return;
-      }
-
       try {
         setListsLoading(true);
         // Request server-side paginated lists filtered by vendor and active status
-        const res = await getVendorListsApi(currentPage, rowsPerPage, selectedVendorId, "active");
+        const res = await getVendorListsApi(
+          currentPage,
+          rowsPerPage,
+          selectedVendorId || null,
+          "active",
+          selectedLeadTypeId ? Number(selectedLeadTypeId) : null,
+          dateRange?.startDate || null,
+          dateRange?.endDate || null
+        );
 
         let rawData = [];
         let pagination = null;
@@ -202,7 +218,6 @@ const ActiveList = ({ title = "Active Lists" }) => {
           pagination = res.data.pagination || res.pagination;
         }
 
-        const vendorName = vendors.find(v => String(v.id) === String(selectedVendorId))?.name || "Unknown Vendor";
         const transformedData = rawData.map((item) => ({
           id: item.id,
           name: item.listName || item.list_name || "-",
@@ -212,7 +227,9 @@ const ActiveList = ({ title = "Active Lists" }) => {
             failed: 0,
             skipped: 0,
           },
-          vendorName: vendorName || item?.Vendor?.vendor_name || "Unknown Vendor",
+          vendorName: item?.Vendor?.vendor_name
+            || vendors.find(v => String(v.id) === String(item?.vendor_id || selectedVendorId))?.name
+            || "Unknown Vendor",
         }));
 
         setVendorLists(transformedData);
@@ -227,7 +244,7 @@ const ActiveList = ({ title = "Active Lists" }) => {
     };
 
     fetchVendorLists();
-  }, [selectedVendorId, currentPage, rowsPerPage, dateRange, location.key]);
+  }, [selectedVendorId, selectedLeadTypeId, currentPage, rowsPerPage, dateRange?.startDate, dateRange?.endDate, location.key]);
 
   // get vendor by name or fallback to first vendor
   const getVendorById = (vendorName) => {
@@ -388,19 +405,31 @@ const ActiveList = ({ title = "Active Lists" }) => {
                 size="sm"
                 isSelect
                 options={[
-                  { label: "Lead Types", value: "" },
-                  { label: "Total Leads", value: "total" },
-                  { label: "Total Abandons Leads", value: "abandons" },
-                  { label: "Buyers Leads", value: "buyers" },
-                  { label: "Declines Leads", value: "declines" },
+                  { label: "Select Lead Types", value: "" },
+                  ...leadTypes.map((v) => ({
+                    label: v.name || v.vertical_name || "",
+                    value: v?.id != null ? String(v.id) : "",
+                  })),
                 ]}
                 name="leadType"
+                value={selectedLeadTypeId || ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  onLeadTypeChange && onLeadTypeChange(val);
+                  setCurrentPage(1);
+                }}
               />
+              {/* Optional: show small error text if fetch fails (non-intrusive) */}
+              {leadTypesError ? (
+                <div className="text-[11px] text-red-500 mt-1">
+                  {leadTypesError}
+                </div>
+              ) : null}
             </div>
 
             {/* Date Range Dropdown */}
             <div className="w-full">
-              <DateRangeDropdown onDateRangeChange={setDateRange} />
+              <DateRangeDropdown onDateRangeChange={onDateRangeChange} />
             </div>
 
             {/* Vendor Dropdown */}
@@ -515,7 +544,7 @@ const ActiveList = ({ title = "Active Lists" }) => {
               {!listsLoading && !vendorsLoading && paginatedData.length === 0 && (
                 <tr>
                   <td colSpan={6} className="text-center py-6">
-                    {selectedVendorId ? "No lists found for this vendor" : "No vendor selected"}
+                    No lists found
                   </td>
                 </tr>
               )}

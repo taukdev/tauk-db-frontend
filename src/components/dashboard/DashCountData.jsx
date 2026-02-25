@@ -1,39 +1,90 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import UserCheckIcon from '../../assets/icons/UserCheck-icon.svg';
 import ArrowDownIcon from '../../assets/icons/ArrowDown-icon.svg';
 import CrossxIcon from '../../assets/icons/Crossx-icon.svg';
 import ChainIcon from '../../assets/icons/Chain-icon.svg';
 import CubeIcon from '../../assets/icons/Cube-icon.svg';
 import BgDashDataImage from '../../assets/Bg-dashdata-image.svg';
+import { getVendorListsApi } from "../../api/vendors";
 
-const stats = [
-    { icon: UserCheckIcon, title: "Leads Systemwide", value: "7,334,903" },
-    { icon: ArrowDownIcon, title: "Leads Imported Today", value: "1,765" },
-    { icon: CrossxIcon, title: "Total Abandons Leads", value: "3,564" },
-    { icon: ChainIcon, title: "Buyers leads", value: "7,342" },
-    { icon: CubeIcon, title: "Declines Leads", value: "3,657" },
-];
+export default function DashCountData({ dateRange, selectedLeadTypeId }) {
+    const [summary, setSummary] = useState({
+        leads_systemwide: 0,
+        leads_today: 0,
+        abandons: 0,
+        buyers: 0,
+        declines: 0,
+    });
+    const [error, setError] = useState(null);
 
-export default function DashCountData() {
+    useEffect(() => {
+        let mounted = true;
+        const fetchData = async () => {
+            try {
+                setError(null);
+                const res = await getVendorListsApi(
+                    1,
+                    10,
+                    null,
+                    "active",
+                    selectedLeadTypeId ? Number(selectedLeadTypeId) : null,
+                    dateRange?.startDate || null,
+                    dateRange?.endDate || null
+                );
+                let lists = [];
+                let sum = {};
+                if (Array.isArray(res?.data?.lists)) {
+                    lists = res.data.lists;
+                    sum = res.data.summary || res.summary || {};
+                } else if (Array.isArray(res?.data?.data)) {
+                    lists = res.data.data;
+                    sum = res.data.summary || res.summary || {};
+                } else if (Array.isArray(res?.data)) {
+                    lists = res.data;
+                    sum = res.summary || {};
+                } else if (Array.isArray(res)) {
+                    lists = res;
+                    sum = {};
+                }
+                const totalLeads = lists.reduce((acc, item) => acc + (Number(item.total_leads) || 0), 0);
+                if (mounted) {
+                    setSummary({
+                        leads_systemwide: sum.leads_systemwide ?? totalLeads,
+                        leads_today: sum.leads_today ?? 0,
+                        abandons: sum.abandons ?? 0,
+                        buyers: sum.buyers ?? 0,
+                        declines: sum.declines ?? 0,
+                    });
+                }
+            } catch (e) {
+                if (mounted) setError(e?.message || "Failed to load");
+            }
+        };
+        fetchData();
+        return () => {
+            mounted = false;
+        };
+    }, [selectedLeadTypeId, dateRange?.startDate, dateRange?.endDate]);
+
+    const stats = useMemo(() => ([
+        { icon: UserCheckIcon, title: "Leads Systemwide", value: (summary.leads_systemwide || 0).toLocaleString() },
+        { icon: ArrowDownIcon, title: "Leads Imported Today", value: String(summary.leads_today || 0) },
+        { icon: CrossxIcon, title: "Total Abandons Leads", value: String(summary.abandons || 0) },
+        { icon: ChainIcon, title: "Buyers leads", value: String(summary.buyers || 0) },
+        { icon: CubeIcon, title: "Declines Leads", value: String(summary.declines || 0) },
+    ]), [summary]);
+
     return (
         <div className="w-full max-w-full mx-auto">
             <div
                 className="bg-white rounded-xl p-3 sm:p-4 md:p-2 w-full"
                 style={{
                     border: "1px solid #8B92A633",
-                    // Hide background on small screens by not setting it until md
                     backgroundImage: undefined,
                 }}
             >
                 <div
                     className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6 w-full"
-                    style={{
-                        // Add decorative background only from md and up using a media query fallback
-                        backgroundImage: `url(${BgDashDataImage})`,
-                        backgroundPosition: 'right',
-                        backgroundSize: 'contain',
-                        backgroundRepeat: 'no-repeat'
-                    }}
                 >
                     {stats.map(({ icon, title, value }, idx) => (
                         <div

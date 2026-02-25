@@ -308,7 +308,7 @@ function VendorListAdd() {
             {/* List Vertical */}
             <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
               <label className="w-full md:w-1/4 text-sm text-neutral mb-0 md:mb-4">
-                List Vertical
+                List Type
               </label>
               <div className="w-full md:w-3/4">
                 <CustomTextField

@@ -240,13 +240,37 @@ const WebhookHistoryReport = () => {
                         <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-4 flex flex-wrap gap-4 text-sm">
                             <div><span className="font-semibold text-gray-600">Vendor:</span> <span className="text-primary-dark font-medium">{reportData.Vendor?.vendor_name || selectedVendorId}</span></div>
                             <div><span className="font-semibold text-gray-600">List:</span> <span className="text-primary-dark font-medium">{selectedListId}</span></div>
-                            {reportData.date_range && (
-                                <div>
-                                    <span className="font-semibold text-gray-600">Date Range:</span> <span className="text-primary-dark font-medium">
-                                        {new Date(reportData.date_range.start).toLocaleDateString()} - {new Date(reportData.date_range.end).toLocaleDateString()}
-                                    </span>
-                                </div>
-                            )}
+                            {(() => {
+                                const range = reportData.date_range;
+                                let startRaw = null;
+                                let endRaw = null;
+                                if (range && typeof range === "object") {
+                                    startRaw = range.start || range.from || range.begin;
+                                    endRaw = range.end || range.to || range.finish;
+                                } else if (typeof range === "string") {
+                                    const parts = range.split(/\s+to\s+/i);
+                                    if (parts.length === 2) {
+                                        startRaw = parts[0];
+                                        endRaw = parts[1];
+                                    }
+                                }
+                                const toLabel = (v) => {
+                                    if (!v) return null;
+                                    const d = new Date(v);
+                                    return isNaN(d.getTime()) ? v : d.toLocaleDateString();
+                                };
+                                const startLabel = toLabel(startRaw) || (startDate ? toLabel(startDate) : null);
+                                const endLabel = toLabel(endRaw) || (endDate ? toLabel(endDate) : null);
+                                if (!startLabel && !endLabel) return null;
+                                return (
+                                    <div>
+                                        <span className="font-semibold text-gray-600">Date Range:</span>{" "}
+                                        <span className="text-primary-dark font-medium">
+                                            {startLabel || "-"} - {endLabel || "-"}
+                                        </span>
+                                    </div>
+                                );
+                            })()}
                         </div>
 
                         {filteredHistory.map((item) => (
