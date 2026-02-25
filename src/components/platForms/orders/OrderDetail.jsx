@@ -7,7 +7,6 @@ import {
   clearOrderDetails,
 } from "../../../features/platform/orderDetailSlice";
 
-// Subcomponents
 import OrderInfo from "./OrderInfo";
 import DailyDeliveryBreakdown from "./DailyDeliveryBreakdown";
 import { setBreadcrumbs } from "../../../features/breadcrumb/breadcrumbSlice";
@@ -17,21 +16,19 @@ export default function OrderDetail() {
   const { platformId, id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const platform = useSelector((state) =>
     selectPlatformById(state, platformId)
   );
 
-  const { orderDetails, dailyBreakdown, loading, error } = useSelector(
-    (state) => state.orderDetail
-  );
+  const { orderDetails, dailyBreakdown, loadingOrder, loadingBreakdown, loading, error } =
+    useSelector((state) => state.orderDetail);
 
   useEffect(() => {
     if (id && platformId) {
       dispatch(fetchOrderDetails({ platformId, orderId: id }));
       dispatch(fetchDailyDeliveryBreakdown(id));
     }
-
-    // Cleanup on unmount
     return () => {
       dispatch(clearOrderDetails());
     };
@@ -43,7 +40,7 @@ export default function OrderDetail() {
         { label: "Platforms", path: "/platforms" },
         { label: platform?.name, path: "/platforms/" + platform?.id + "/" },
         {
-          label: `${id} - Lead Order `,
+          label: `${id} - Lead Order`,
           path: "/platform/" + platform?.id + "/orders/" + id + "/",
         },
       ])
@@ -55,20 +52,14 @@ export default function OrderDetail() {
       <div className="p-3 sm:p-4 md:p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-center">
-            <svg
-              className="w-5 h-5 text-red-400 mr-2"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
+            <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
                 d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
                 clipRule="evenodd"
               />
             </svg>
-            <p className="text-red-800 text-sm">
-              Error loading order details: {error}
-            </p>
+            <p className="text-red-800 text-sm">Error loading order details: {error}</p>
           </div>
           <button
             onClick={() => navigate(-1)}
@@ -81,7 +72,8 @@ export default function OrderDetail() {
     );
   }
 
-  if (loading && !orderDetails) {
+  // ✅ KEY FIX: Show loading if order is being fetched OR if we have no data yet
+  if (loadingOrder || (!orderDetails && !error)) {
     return (
       <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
         <div className="animate-pulse">
@@ -127,9 +119,7 @@ export default function OrderDetail() {
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Order Not Found
-          </h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Order Not Found</h3>
           <p className="text-gray-500 mb-4">
             The order you're looking for doesn't exist or has been removed.
           </p>
@@ -151,23 +141,17 @@ export default function OrderDetail() {
         <h1 className="text-base xs:text-lg sm:text-xl md:text-2xl font-semibold text-primary-dark break-words">
           {orderDetails.leadOrderId} - Lead Order
         </h1>
-        {/* <p className="text-xs xs:text-sm sm:text-base text-gray-500">
-          Order entered on {orderDetails.dateEntered}
-        </p> */}
       </div>
 
       {/* Layout - Responsive Grid - Equal Width */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 xs:gap-4 md:gap-6">
-        {/* Order Info Section - 50% width on desktop */}
         <div className="order-1">
           <OrderInfo orderDetails={orderDetails} />
         </div>
-
-        {/* Daily Delivery Breakdown - 50% width on desktop */}
-        <div className="order-2  lg:sticky lg:top-[-105px] self-start">
+        <div className="order-2 lg:sticky lg:top-[-105px] self-start">
           <DailyDeliveryBreakdown
             dailyBreakdown={dailyBreakdown}
-            loading={loading}
+            loading={loadingBreakdown}
           />
         </div>
       </div>
