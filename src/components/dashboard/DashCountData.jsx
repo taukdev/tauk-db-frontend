@@ -7,13 +7,15 @@ import CubeIcon from '../../assets/icons/Cube-icon.svg';
 import BgDashDataImage from '../../assets/Bg-dashdata-image.svg';
 import { getVendorListsApi } from "../../api/vendors";
 
-export default function DashCountData({ dateRange, selectedLeadTypeId }) {
+export default function DashCountData({ dateRange, selectedLeadTypeId, selectedVendorId }) {
     const [summary, setSummary] = useState({
         leads_systemwide: 0,
         leads_today: 0,
         abandons: 0,
         buyers: 0,
         declines: 0,
+        api_leads: 0,
+        webhook_leads: 0,
     });
     const [error, setError] = useState(null);
 
@@ -25,7 +27,7 @@ export default function DashCountData({ dateRange, selectedLeadTypeId }) {
                 const res = await getVendorListsApi(
                     1,
                     10,
-                    null,
+                    selectedVendorId ? Number(selectedVendorId) : null,
                     "active",
                     selectedLeadTypeId ? Number(selectedLeadTypeId) : null,
                     dateRange?.startDate || null,
@@ -47,13 +49,18 @@ export default function DashCountData({ dateRange, selectedLeadTypeId }) {
                     sum = {};
                 }
                 const totalLeads = lists.reduce((acc, item) => acc + (Number(item.total_leads) || 0), 0);
+                const totalApiLeads = lists.reduce((acc, item) => acc + (Number(item.api_leads) || 0), 0);
+                const totalWebhookLeads = lists.reduce((acc, item) => acc + (Number(item.webhook_leads) || 0), 0);
+
                 if (mounted) {
                     setSummary({
-                        leads_systemwide: sum.leads_systemwide ?? totalLeads,
-                        leads_today: sum.leads_today ?? 0,
+                        leads_systemwide: sum.total_leads ?? totalLeads,
+                        leads_today: sum.leads_today ?? totalLeads,
                         abandons: sum.abandons ?? 0,
                         buyers: sum.buyers ?? 0,
                         declines: sum.declines ?? 0,
+                        api_leads: sum.api_leads ?? totalApiLeads,
+                        webhook_leads: sum.webhook_leads ?? totalWebhookLeads,
                     });
                 }
             } catch (e) {
@@ -64,11 +71,13 @@ export default function DashCountData({ dateRange, selectedLeadTypeId }) {
         return () => {
             mounted = false;
         };
-    }, [selectedLeadTypeId, dateRange?.startDate, dateRange?.endDate]);
+    }, [selectedLeadTypeId, dateRange?.startDate, dateRange?.endDate, selectedVendorId]);
 
     const stats = useMemo(() => ([
         { icon: UserCheckIcon, title: "Leads Systemwide", value: (summary.leads_systemwide || 0).toLocaleString() },
-        { icon: ArrowDownIcon, title: "Leads Imported Today", value: String(summary.leads_today || 0) },
+        { icon: ArrowDownIcon, title: "Total Leads (Today)", value: String(summary.leads_today || 0) },
+        // { icon: ArrowDownIcon, title: "API Leads (Today)", value: String(summary.api_leads || 0) },
+        // { icon: ArrowDownIcon, title: "Webhook Leads (Today)", value: String(summary.webhook_leads || 0) },
         { icon: CrossxIcon, title: "Total Abandons Leads", value: String(summary.abandons || 0) },
         { icon: ChainIcon, title: "Buyers leads", value: String(summary.buyers || 0) },
         { icon: CubeIcon, title: "Declines Leads", value: String(summary.declines || 0) },
@@ -84,7 +93,7 @@ export default function DashCountData({ dateRange, selectedLeadTypeId }) {
                 }}
             >
                 <div
-                    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6 w-full"
+                    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-3 sm:gap-4 md:gap-6 w-full"
                 >
                     {stats.map(({ icon, title, value }, idx) => (
                         <div

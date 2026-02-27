@@ -242,7 +242,7 @@ const ListImportState = () => {
                       <h4 className="font-semibold text-primary-dark mb-3 text-sm sm:text-base">
                         {list.list_name || `List ${list.list_id}`}
                       </h4>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-5 gap-3">
                         <div>
                           <p className="text-[10px] text-gray-600 uppercase font-bold">LEADS</p>
                           <p className="text-sm font-semibold text-primary-dark">
@@ -261,6 +261,18 @@ const ListImportState = () => {
                             {list.total_buyers || list.buyers || 0}
                           </p>
                         </div>
+                        <div>
+                          <p className="text-[10px] text-gray-600 uppercase font-bold">Total Imports</p>
+                          <p className="text-sm font-semibold text-primary-dark">
+                            {list.total_imports || 0}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-600 uppercase font-bold">Declines</p>
+                          <p className="text-sm font-semibold text-primary-dark">
+                            {list.total_declines || list.declines || 0}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -270,7 +282,7 @@ const ListImportState = () => {
                   <table className="min-w-full border border-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium">
+                        <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-bold uppercase">
                           List Name
                         </th>
                         <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-bold uppercase">
@@ -281,6 +293,12 @@ const ListImportState = () => {
                         </th>
                         <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-bold uppercase">
                           Total Buyers
+                        </th>
+                        {/* <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-bold uppercase">
+                          Total Imports
+                        </th> */}
+                        <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-bold uppercase">
+                          Total Declines
                         </th>
                       </tr>
                     </thead>
@@ -299,6 +317,12 @@ const ListImportState = () => {
                           <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
                             {list.total_buyers || list.buyers || 0}
                           </td>
+                          {/* <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
+                            {list.total_imports || 0}
+                          </td> */}
+                          <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
+                            {list.total_declines || list.declines || 0}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -314,7 +338,7 @@ const ListImportState = () => {
                   <h3 className="text-base sm:text-lg font-semibold text-primary-dark mb-3 sm:mb-4">
                     Daily Breakdown
                   </h3>
-            
+
                   <div className="block md:hidden space-y-3">
                     {reportData.daily_breakdown.map((day, index) => (
                       <div
@@ -326,24 +350,36 @@ const ListImportState = () => {
                             {day.date}
                           </p>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-4 gap-3">
                           <div>
-                            <p className="text-xs text-gray-600">Imports</p>
+                            <p className="text-xs text-gray-600">Total Imports</p>
                             <p className="text-sm font-semibold text-primary-dark">
-                              {day.imports || 0}
+                              {day.total_imports || 0}
                             </p>
                           </div>
                           <div>
                             <p className="text-xs text-gray-600">Records</p>
                             <p className="text-sm font-semibold text-primary-dark">
-                              {day.records || 0}
+                              {day.total_records || day.records || 0}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-600">CSV Imports</p>
+                            <p className="text-sm font-semibold text-primary-dark">
+                              {day.csv_imports || 0}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-600">Webhook Imports</p>
+                            <p className="text-sm font-semibold text-primary-dark">
+                              {day.webhook_imports || 0}
                             </p>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-           
+
                   <div className="hidden md:block overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6">
                     <table className="min-w-full border border-gray-200">
                       <thead className="bg-gray-50">
@@ -352,10 +388,16 @@ const ListImportState = () => {
                             Date
                           </th>
                           <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium">
-                            Imports
+                            Total Imports
                           </th>
                           <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium">
                             Records
+                          </th>
+                          <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium">
+                            CSV Imports
+                          </th>
+                          <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium">
+                            Webhook Imports
                           </th>
                         </tr>
                       </thead>
@@ -366,10 +408,16 @@ const ListImportState = () => {
                               {day.date}
                             </td>
                             <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
-                              {day.imports || 0}
+                              {day.total_imports || day.imports || 0}
                             </td>
                             <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
-                              {day.records || 0}
+                              {day.total_records || day.records || 0}
+                            </td>
+                            <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
+                              {day.csv_imports || 0}
+                            </td>
+                            <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
+                              {day.webhook_imports || 0}
                             </td>
                           </tr>
                         ))}

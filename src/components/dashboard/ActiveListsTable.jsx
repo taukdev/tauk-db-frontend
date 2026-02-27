@@ -129,7 +129,7 @@ function DateRangeDropdown({ onDateRangeChange }) {
   );
 }
 
-const ActiveList = ({ title = "Active Lists", dateRange, onDateRangeChange, selectedLeadTypeId, onLeadTypeChange }) => {
+const ActiveList = ({ title = "Active Lists", dateRange, onDateRangeChange, selectedLeadTypeId, onLeadTypeChange, selectedVendorId, onVendorChange }) => {
   const dispatch = useDispatch();
   const location = useLocation();
   const vendorsData = useSelector((state) => state.vendors.vendors || []);
@@ -137,9 +137,6 @@ const ActiveList = ({ title = "Active Lists", dateRange, onDateRangeChange, sele
 
   // Ensure vendors is always an array
   const vendors = Array.isArray(vendorsData) ? vendorsData : [];
-
-  // State for selected vendor
-  const [selectedVendorId, setSelectedVendorId] = useState(null);
 
   // Get selected vendor object
   const selectedVendor = vendors.find(v => String(v.id) === String(selectedVendorId)) || null;
@@ -223,9 +220,9 @@ const ActiveList = ({ title = "Active Lists", dateRange, onDateRangeChange, sele
           name: item.listName || item.list_name || "-",
           totalLeadCount: item.total_leads,
           importStats: {
-            imported: 0,
-            failed: 0,
-            skipped: 0,
+            api: item.api_leads || 0,
+            webhook: item.webhook_leads || 0,
+            total: item.total_leads || 0,
           },
           vendorName: item?.Vendor?.vendor_name
             || vendors.find(v => String(v.id) === String(item?.vendor_id || selectedVendorId))?.name
@@ -448,7 +445,7 @@ const ActiveList = ({ title = "Active Lists", dateRange, onDateRangeChange, sele
                 value={selectedVendorId ? String(selectedVendorId) : ""}
                 onChange={(e) => {
                   const vendorId = e.target.value;
-                  setSelectedVendorId(vendorId ? Number(vendorId) : null);
+                  onVendorChange && onVendorChange(vendorId ? Number(vendorId) : null);
                   setCurrentPage(1); // Reset to first page when vendor changes
                 }}
               />
@@ -576,14 +573,14 @@ const ActiveList = ({ title = "Active Lists", dateRange, onDateRangeChange, sele
                   </td>
                   <td className="pl-5 py-6 border border-light text-black font-medium">
                     <div className="flex flex-wrap gap-2">
-                      <span className="inline-block border border-light px-2 py-1 rounded-md text-xs font-medium">
-                        {list.importStats?.imported ?? 0}
+                      <span className="inline-block border border-light px-2 py-1 rounded-md text-xs font-medium" title="API Leads (Today)">
+                        {list.importStats?.api ?? 0}
                       </span>
-                      <span className="inline-block border border-light px-2 py-1 rounded-md text-xs font-medium text-transparent bg-clip-text bg-gradient-primary">
-                        {list.importStats?.failed ?? 0}
+                      <span className="inline-block border border-light px-2 py-1 rounded-md text-xs font-medium text-transparent bg-clip-text bg-gradient-primary" title="Webhook Leads (Today)">
+                        {list.importStats?.webhook ?? 0}
                       </span>
-                      <span className="inline-block border border-light px-2 py-1 rounded-md text-xs font-medium text-transparent bg-clip-text bg-gradient-primary">
-                        {list.importStats?.skipped ?? 0}
+                      <span className="inline-block border border-primary/20 bg-primary/5 px-2 py-1 rounded-md text-xs font-bold text-primary" title="Total Leads (Today)">
+                        {list.importStats?.total ?? 0}
                       </span>
                     </div>
                   </td>

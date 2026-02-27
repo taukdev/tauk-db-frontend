@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getPlatformOrderByIdApi } from "../../api/platforms";
+import { getPlatformOrderByIdApi, getPlatformOrderDailyBreakdownApi } from "../../api/platforms";
 
 export const fetchOrderDetails = createAsyncThunk(
   "orderDetail/fetchDetails",
@@ -15,21 +15,18 @@ export const fetchOrderDetails = createAsyncThunk(
 
 export const fetchDailyDeliveryBreakdown = createAsyncThunk(
   "orderDetail/fetchDailyBreakdown",
-  async (orderId) => {
-    return [
-      { date: "2023-06-05", leadsDelivered: 2 },
-      { date: "2023-06-06", leadsDelivered: 86 },
-      { date: "2023-06-07", leadsDelivered: 83 },
-      { date: "2023-06-08", leadsDelivered: 84 },
-      { date: "2023-06-09", leadsDelivered: 86 },
-      { date: "2023-06-10", leadsDelivered: 87 },
-      { date: "2023-06-11", leadsDelivered: 86 },
-      { date: "2023-06-12", leadsDelivered: 84 },
-      { date: "2023-06-13", leadsDelivered: 37 },
-      { date: "2023-06-14", leadsDelivered: 89 },
-      { date: "2023-06-15", leadsDelivered: 92 },
-      { date: "2023-06-16", leadsDelivered: 88 },
-    ];
+  async ({ platformId, orderId }, { rejectWithValue }) => {
+    try {
+      const response = await getPlatformOrderDailyBreakdownApi(platformId, orderId);
+      const data = response?.data || response || [];
+      return Array.isArray(data) ? data.map(item => ({
+        ...item,
+        leadsDelivered: item.leads_delivered ?? item.leadsDelivered ?? 0,
+        date: item.date ?? item.Date ?? ""
+      })) : data;
+    } catch (error) {
+      return rejectWithValue(error.message || "Failed to fetch daily breakdown");
+    }
   }
 );
 

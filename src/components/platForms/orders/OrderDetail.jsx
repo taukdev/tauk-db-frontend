@@ -27,12 +27,12 @@ export default function OrderDetail() {
   useEffect(() => {
     if (id && platformId) {
       dispatch(fetchOrderDetails({ platformId, orderId: id }));
-      dispatch(fetchDailyDeliveryBreakdown(id));
+      dispatch(fetchDailyDeliveryBreakdown({ platformId, orderId: id }));
     }
     return () => {
       dispatch(clearOrderDetails());
     };
-  }, [dispatch, id]);
+  }, [dispatch, id, platformId]);
 
   useEffect(() => {
     dispatch(

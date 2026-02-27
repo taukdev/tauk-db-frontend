@@ -11,6 +11,7 @@ function DashboardPage() {
     const vendors = useSelector((state) => state.vendors.vendors || []);
     const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
     const [selectedLeadTypeId, setSelectedLeadTypeId] = useState("");
+    const [selectedVendorId, setSelectedVendorId] = useState(null);
 
     useEffect(() => {
         dispatch(
@@ -30,14 +31,17 @@ function DashboardPage() {
         <>
             <CustomTitle> Dashboard </CustomTitle>
             <DashCountData
-              dateRange={dateRange}
-              selectedLeadTypeId={selectedLeadTypeId}
+                dateRange={dateRange}
+                selectedLeadTypeId={selectedLeadTypeId}
+                selectedVendorId={selectedVendorId}
             />
             <ActiveListsTable
-              dateRange={dateRange}
-              onDateRangeChange={setDateRange}
-              selectedLeadTypeId={selectedLeadTypeId}
-              onLeadTypeChange={setSelectedLeadTypeId}
+                dateRange={dateRange}
+                onDateRangeChange={setDateRange}
+                selectedLeadTypeId={selectedLeadTypeId}
+                onLeadTypeChange={setSelectedLeadTypeId}
+                selectedVendorId={selectedVendorId}
+                onVendorChange={setSelectedVendorId}
             />
         </>
     )

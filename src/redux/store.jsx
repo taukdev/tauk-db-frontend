@@ -22,6 +22,7 @@ import scrubReportReducer from '../features/reports/ScrubReportSlice.jsx';
 import activeCampaignsReducer from '../features/activeCampaigns/activeCampaignsSlice.jsx';
 import platformDetailReducer from '../features/platform/platformDetailSlice';
 import biddingPostsReducer from '../features/outgoing/biddingPostsSlice';
+import orderLeadReportReducer from '../features/reports/OrderLeadReportSlice';
 
 export const store = configureStore({
   reducer: {
@@ -47,5 +48,6 @@ export const store = configureStore({
     scrubReport: scrubReportReducer,
     activeCampaigns: activeCampaignsReducer,
     biddingPosts: biddingPostsReducer,
+    orderLeadReport: orderLeadReportReducer,
   },
 });

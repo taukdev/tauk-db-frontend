@@ -110,6 +110,19 @@ export async function getPlatformOrderByIdApi(platformId, orderId) {
     return await apiJson(`${PLATFORM_PATH}/${platformId}/order/${orderId}`, { method: "GET" });
 }
 
+export async function getPlatformOrderDailyBreakdownApi(platformId, orderId) {
+    return await apiJson(`${PLATFORM_PATH}/${platformId}/order/${orderId}/daily-breakdown`, { method: "GET" });
+}
+
+export async function getPlatformOrderLeadReportApi(platformId, orderId, params) {
+    let url = `${PLATFORM_PATH}/${platformId}/order/${orderId}/lead-report`;
+    if (params) {
+        const query = new URLSearchParams(params).toString();
+        if (query) url += `?${query}`;
+    }
+    return await apiJson(url, { method: "GET" });
+}
+
 // API (Integrations)
 export async function createApiIntegrationApi(platformId, payload) {
     return await apiJson(`${PLATFORM_PATH}/${platformId}/api-integration`, {
