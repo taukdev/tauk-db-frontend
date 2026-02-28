@@ -35,17 +35,21 @@ export default function OrderDetail() {
   }, [dispatch, id, platformId]);
 
   useEffect(() => {
+    const platformName = platform?.name || orderDetails?.platform;
     dispatch(
       setBreadcrumbs([
         { label: "Platforms", path: "/platforms" },
-        { label: platform?.name, path: "/platforms/" + platform?.id + "/" },
+        {
+          label: platformName || "Loading...",
+          path: `/platforms/${platformId}`
+        },
         {
           label: `${id} - Lead Order`,
-          path: "/platform/" + platform?.id + "/orders/" + id + "/",
+          path: `/platform/${platformId}/orders/${id}`,
         },
       ])
     );
-  }, [dispatch]);
+  }, [dispatch, platform, orderDetails, id, platformId]);
 
   if (error) {
     return (
