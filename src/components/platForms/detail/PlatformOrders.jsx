@@ -266,7 +266,15 @@ const PlatformOrders = ({ platformId }) => {
                     {/* Leads Delivered */}
                     <td className="px-5 py-4 border border-light text-[#071437] font-medium">
                       <div className="flex items-center justify-between gap-2">
-                        <span>{order.leadsDelivered}</span>
+                        <div className="flex items-center gap-2">
+                          <span>{order.leadsDelivered}</span>
+                          {order.leadsRejected > 0 && (
+                            <div className="flex items-center gap-1 text-red-500 text-xs" title={order.rejectionReason}>
+                              <span>({order.leadsRejected} rejected)</span>
+                              <img src={DangerCircleIcon} alt="Error" className="w-4 h-4" />
+                            </div>
+                          )}
+                        </div>
                         <img
                           src={cloudUploadIcon}
                           alt="Upload"

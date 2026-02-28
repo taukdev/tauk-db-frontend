@@ -22,6 +22,8 @@ export const fetchDailyDeliveryBreakdown = createAsyncThunk(
       return Array.isArray(data) ? data.map(item => ({
         ...item,
         leadsDelivered: item.leads_delivered ?? item.leadsDelivered ?? 0,
+        leadsRejected: item.leads_rejected ?? item.leadsRejected ?? 0,
+        rejectionDetails: item.rejection_details ?? item.rejectionDetails ?? [],
         date: item.date ?? item.Date ?? ""
       })) : data;
     } catch (error) {

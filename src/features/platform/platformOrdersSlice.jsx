@@ -27,6 +27,12 @@ const mapOrderFromApi = (order) => {
         : (order.leadsDelivered !== undefined && order.leadsDelivered !== null
           ? order.leadsDelivered
           : 0),
+      leadsRejected: order.leads_rejected !== undefined && order.leads_rejected !== null
+        ? order.leads_rejected
+        : (order.leadsRejected !== undefined && order.leadsRejected !== null
+          ? order.leadsRejected
+          : 0),
+      rejectionReason: order.rejection_reason || order.rejectionReason || "No reason provided",
       orderType: order.order_type || order.orderType || order.order_kind || "N/A",
       postStatus: order.post_status || order.postStatus || "N/A",
       // Include any other fields that might be needed
@@ -47,13 +53,13 @@ export const fetchPlatformOrders = createAsyncThunk(
       }
 
       const response = await getPlatformOrdersApi(platformId);
-      
+
       // Handle different response structures
       // Expected: { status: "success", data: [...], pagination: {...} }
       // Or: { data: [...] }
       // Or: [...] (direct array)
       let orders = [];
-      
+
       if (Array.isArray(response)) {
         // Direct array response
         orders = response;
@@ -81,9 +87,9 @@ export const fetchPlatformOrders = createAsyncThunk(
       return mappedOrders;
     } catch (error) {
       console.error("Error fetching platform orders:", error);
-      const errorMessage = error?.response?.data?.message || 
-                          error?.message || 
-                          "Failed to fetch platform orders";
+      const errorMessage = error?.response?.data?.message ||
+        error?.message ||
+        "Failed to fetch platform orders";
       return rejectWithValue(errorMessage);
     }
   }
@@ -94,7 +100,7 @@ export const createPlatformOrder = createAsyncThunk(
   async ({ platformId, payload }, { rejectWithValue }) => {
     try {
       const response = await createPlatformOrderApi(platformId, payload);
-      
+
       // Handle different response structures
       if (response?.status === "success") {
         return response.data || response;
@@ -105,20 +111,20 @@ export const createPlatformOrder = createAsyncThunk(
       }
     } catch (error) {
       console.error("Create platform order error:", error);
-      
+
       // Extract error message from different possible response structures
-      const errorMessage = 
+      const errorMessage =
         error?.response?.data?.error ||
         error?.response?.data?.message ||
         error?.message ||
         "Failed to create platform order";
-      
+
       const errorData = {
         message: errorMessage,
         status: error?.response?.status,
         data: error?.response?.data
       };
-      
+
       return rejectWithValue(errorData);
     }
   }

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Search } from "lucide-react";
 
 import tableHeaderIcon from "../../../assets/icons/t-header-icon.svg";
+import DangerCircleIcon from "../../../assets/icons/Danger-Circle.svg";
 
 const DailyDeliveryBreakdown = ({ dailyBreakdown, loading }) => {
   const [search, setSearch] = useState("");
@@ -99,30 +100,55 @@ const DailyDeliveryBreakdown = ({ dailyBreakdown, loading }) => {
 
               <th className="px-5 py-3 border border-light">
                 <div className="flex items-center gap-2 font-normal">
-                  Leads Delivered
+                  Leads (Delivered/Rejected)
                   <img src={tableHeaderIcon} alt="Sort" />
-                </div>  
+                </div>
               </th>
             </tr>
           </thead>
 
           <tbody>
             {paginatedData.length > 0 ? (
-              paginatedData.map((item, index) => (
-                <tr
-                  key={index}
-                  className="bg-white hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-5 py-6 border border-light text-[#071437] font-medium">
-                    {item.date}
-                  </td>
-                  <td className="px-5 py-6 border border-light text-primary-dark">
-                    <span className="text-primary font-medium underline decoration-dashed underline-offset-4 cursor-pointer hover:text-[#0066CC] transition-colors">
-                      {item.leadsDelivered}
-                    </span>
-                  </td>
-                </tr>
-              ))
+              paginatedData.map((item, index) => {
+                const leadsRejected = Number(item.leadsRejected || item.leads_rejected || 0);
+                const rejectionDetails = item.rejectionDetails || item.rejection_details || [];
+
+                // Debug log to console
+                if (index === 0) console.log("Daily Breakdown Item:", item);
+
+                return (
+                  <tr
+                    key={index}
+                    className="bg-white hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-5 py-6 border border-light text-[#071437] font-medium">
+                      {item.date}
+                    </td>
+                    <td className="px-5 py-6 border border-light text-primary-dark">
+                      <div className="flex items-center gap-2">
+                        <span className="text-primary font-medium underline decoration-dashed underline-offset-4 cursor-pointer hover:text-[#0066CC] transition-colors">
+                          {item.leadsDelivered}
+                        </span>
+                        {leadsRejected > 0 && (
+                          <div
+                            className="flex items-center gap-1 text-red-500 text-xs cursor-help"
+                            title={
+                              rejectionDetails.length > 0
+                                ? rejectionDetails.map(rd =>
+                                  `${rd.list_name || 'List'}: ${rd.reason}`
+                                ).join('\n')
+                                : 'No rejection details available'
+                            }
+                          >
+                            <span>({leadsRejected} rejected)</span>
+                            <img src={DangerCircleIcon} alt="Rejection Reason" className="w-4 h-4" />
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td
@@ -205,7 +231,7 @@ const DailyDeliveryBreakdown = ({ dailyBreakdown, loading }) => {
           </div>
         </div>
       </div>
-    </div>                                      
+    </div>
   );
 };
 
