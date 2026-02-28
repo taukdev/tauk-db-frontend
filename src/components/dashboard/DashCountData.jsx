@@ -78,7 +78,7 @@ export default function DashCountData({ dateRange, selectedLeadTypeId, selectedV
         { icon: ArrowDownIcon, title: "Total Leads (Today)", value: String(summary.leads_today || 0) },
         // { icon: ArrowDownIcon, title: "API Leads (Today)", value: String(summary.api_leads || 0) },
         // { icon: ArrowDownIcon, title: "Webhook Leads (Today)", value: String(summary.webhook_leads || 0) },
-        { icon: CrossxIcon, title: "Total Abandons Leads", value: String(summary.abandons || 0) },
+        { icon: CrossxIcon, title: "Abandons Leads", value: String(summary.abandons || 0) },
         { icon: ChainIcon, title: "Buyers leads", value: String(summary.buyers || 0) },
         { icon: CubeIcon, title: "Declines Leads", value: String(summary.declines || 0) },
     ]), [summary]);

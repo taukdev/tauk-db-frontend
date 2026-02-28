@@ -79,7 +79,7 @@ function VendorLists({ vendorName }) {
               ? new Date(item.created_at).toLocaleDateString()
               : "-"),
         // revshare: item.revshare || item.owner_revshare_percent || "0",
-        vertical: item.vertical || item.list_vertical || "-",
+        vertical: item.Vertical?.name || item.vertical || item.list_vertical || "-",
         records: item.records || item.sell_times || 0,
         status: item.list_status
           ? item.list_status.charAt(0).toUpperCase() +
