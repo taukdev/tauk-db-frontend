@@ -4,6 +4,7 @@ import {
     PLATFORM_PATH,
     GET_LEAD_RETURN_CUTOFFS_PATH,
     GET_COUNTRIES_PATH,
+    GET_ACTIVE_COUNTRIES_PATH,
     GET_STATES_PATH,
     GET_STATES_BY_COUNTRY_PATH,
     GET_PAYMENT_TERMS_PATH,
@@ -50,6 +51,10 @@ export async function getLeadReturnCutoffsApi() {
  */
 export async function getCountriesApi() {
     return await apiJson(GET_COUNTRIES_PATH, { method: "GET" });
+}
+
+export async function getActiveCountriesApi() {
+    return await apiJson(GET_ACTIVE_COUNTRIES_PATH, { method: "GET" });
 }
 
 /**

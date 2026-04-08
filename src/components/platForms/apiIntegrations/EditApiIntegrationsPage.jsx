@@ -10,7 +10,8 @@ import { updateApiIntegration, setCurrentIntegration, fetchApiIntegrationById } 
 import ApiIntegrationPage from "./ApiIntegrationPage";
 import CustomButton from "../../CustomButton";
 import { useNavigate } from "react-router-dom";
-import { getListsDropdownApi } from "../../../api/platforms";
+import { getListsDropdownApi, getActiveCountriesApi, getActivePlatformPresetsApi } from "../../../api/platforms";
+import LoadingSpinner from "../../common/LoadingSpinner";
 
 const apiTypes = [
     { label: "Regular API", value: "Regular API" },
@@ -50,6 +51,9 @@ function EditApiIntegrations() {
     const [listsDropdown, setListsDropdown] = useState([]);
     const [lastListId, setLastListId] = useState('');
     const [isFirstListIdSet, setIsFirstListIdSet] = useState(false);
+    const [countryOptions, setCountryOptions] = useState([]);
+    const [platformOptions, setPlatformOptions] = useState([]);
+    const [platformsLoading, setPlatformsLoading] = useState(true);
 
     // Get all integrations from redux
     const integrations = useSelector((state) => state.apiIntegrations.integrations || []);
@@ -89,6 +93,56 @@ function EditApiIntegrations() {
             }
         };
         fetchLists();
+
+        const fetchCountries = async () => {
+            try {
+                const response = await getActiveCountriesApi();
+                if (response?.data && Array.isArray(response.data)) {
+                    setCountryOptions(response.data.map(country => ({
+                        label: country.country_name,
+                        value: String(country.id),
+                    })));
+                }
+            } catch (error) {
+                console.error('Error fetching countries:', error);
+            }
+        };
+        fetchCountries();
+
+        const fetchProviders = async () => {
+            try {
+                setPlatformsLoading(true);
+                const response = await getActivePlatformPresetsApi();
+                let data = [];
+                if (Array.isArray(response)) data = response;
+                else if (Array.isArray(response?.data)) data = response.data;
+                else if (Array.isArray(response?.data?.presets)) data = response.data.presets;
+
+                const seen = new Set();
+                const options = [
+                    { label: 'Custom', value: 'custom' },
+                    ...data.map(preset => {
+                        const label = preset.platform_name || preset.preset_name || preset.name;
+                        const value = preset.service_provider || preset.provider || preset.platform || preset.id;
+                        return label && value ? { label: String(label), value: String(value) } : null;
+                    })
+                        .filter(opt => {
+                            if (!opt) return false;
+                            const key = `${opt.label}|${opt.value}`;
+                            if (seen.has(key)) return false;
+                            seen.add(key);
+                            return true;
+                        })
+                ];
+                setPlatformOptions(options);
+            } catch (error) {
+                console.error('Error fetching platform presets:', error);
+                setPlatformOptions([{ label: 'Custom', value: 'custom' }]);
+            } finally {
+                setPlatformsLoading(false);
+            }
+        };
+        fetchProviders();
     }, []);
 
     const cleanApiEndpoint = (url = "") => {
@@ -111,22 +165,45 @@ function EditApiIntegrations() {
             successfulResponse: "",
             headers: "",
             postVariables: "",
+            countryCode: false,
+            countryId: "",
             fieldMapping: "",
         };
 
         return {
             apiDescription: data.name || data.api_description || "",
             apiType: data.apiType || data.api_type || "",
-            platform: data.platform || data.service_provider?.toLowerCase().replace(' ', '_') || 'custom',
-            campaignId: data.campaign_id || "",
+            platform: data.platform || (data.service_provider ? String(data.service_provider) : 'custom'),
+            campaignId: (() => {
+                if (data.campaign_id) return String(data.campaign_id);
+                try {
+                    const postVars = typeof data.post_variables === 'string' ? JSON.parse(data.post_variables) : data.post_variables;
+                    if (postVars && (postVars.campaignId || postVars.campaign_id)) {
+                        return String(postVars.campaignId || postVars.campaign_id);
+                    }
+                } catch (e) {
+                    // Ignore parse error
+                }
+                return "";
+            })(),
             apiEndpoint: cleanApiEndpoint(data.apiEndpoint || data.api_endpoint || data.postUrl),
             timeout: data.timeout || data.timeout_after || 60,
-            postVariables: data.postVariables || data.post_variables || "",
+            postVariables: (() => {
+                if (!data.postVariables && !data.post_variables) return "";
+                const val = data.postVariables || data.post_variables;
+                try {
+                    return typeof val === 'string' ? JSON.stringify(JSON.parse(val), null, 2) : JSON.stringify(val, null, 2);
+                } catch (e) {
+                    return val;
+                }
+            })(),
             dateFormat: data.dateFormat || data.date_format || "",
             urlEncode: (data.urlEncode !== undefined ? data.urlEncode : data.url_encode) === true || data.url_encode === "Yes" ? "Yes" : "No",
             requestType: (data.requestType || data.request_type || "POST").toUpperCase(),
             successfulResponse: data.response || data.successful_response || "",
             headers: data.headers || "",
+            countryCode: (data.is_country_code_enabled !== undefined ? data.is_country_code_enabled : data.countryCode) === true || data.countryCode === 'Yes',
+            countryId: data.country_id !== undefined ? String(data.country_id) : (data.countryId !== undefined ? String(data.countryId) : ""),
             fieldMapping: typeof (data.fieldMapping || data.field_mappings) === 'object'
                 ? JSON.stringify(data.fieldMapping || data.field_mappings, null, 2)
                 : (data.fieldMapping || data.field_mappings || ""),
@@ -198,6 +275,8 @@ function EditApiIntegrations() {
                 successful_response: values.successfulResponse || null,
                 headers: processPlaceholders(parseJsonOrString(values.headers)),
                 post_variables: processPlaceholders(parseJsonOrString(values.postVariables)),
+                is_country_code_enabled: values.countryCode,
+                country_id: values.countryId || null,
                 field_mappings: values.fieldMapping ? (() => {
                     try {
                         return typeof values.fieldMapping === 'string'
@@ -339,23 +418,22 @@ function EditApiIntegrations() {
                             {/* Platform Selection */}
                             <div className='mx-6 flex flex-col md:flex-row md:items-center gap-3'>
                                 <div className='md:w-[200px]'>
-                                    <CustomTextField
-                                        label="Platform"
-                                        name="platform"
-                                        isSelect={true}
-                                        options={[
-                                            // { label: 'Active Campaign', value: 'active_campaign' },
-                                            { label: 'Adopia', value: 'adopia' },
-                                            { label: 'Drip', value: 'drip' },
-                                            { label: 'ListFlex', value: 'listflex' },
-                                            { label: 'Daily Story', value: 'daily_story' },
-                                            { label: 'TaukDial', value: 'taukdial' },
-                                        ]}
-                                        value={formik.values.platform}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={formik.touched.platform ? formik.errors.platform : ''}
-                                    />
+                                    {platformsLoading ? (
+                                        <div className="py-2">
+                                            <LoadingSpinner text="Loading platforms..." size="md" />
+                                        </div>
+                                    ) : (
+                                        <CustomTextField
+                                            label="Platform"
+                                            name="platform"
+                                            isSelect={true}
+                                            options={platformOptions}
+                                            value={formik.values.platform}
+                                            onChange={formik.handleChange}
+                                            onBlur={formik.handleBlur}
+                                            error={formik.touched.platform ? formik.errors.platform : ''}
+                                        />
+                                    )}
                                 </div>
 
                                 <div className="text-xs text-gray-500 mb-2 pt-0 md:pt-2">
@@ -470,6 +548,25 @@ function EditApiIntegrations() {
                                 </div>
                                 <span className="text-sm text-gray-500">{formik.values.countryCode ? 'Yes' : 'No'}</span>
                             </div>
+
+                            {/* Country dropdown - Show when country code is enabled */}
+                            {formik.values.countryCode && (
+                                <div className='mx-6'>
+                                    <CustomTextField
+                                        label="Country"
+                                        name="countryId"
+                                        isSelect={true}
+                                        options={[
+                                            { label: 'Select Country', value: '' },
+                                            ...countryOptions,
+                                        ]}
+                                        value={formik.values.countryId}
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        error={formik.touched.countryId ? formik.errors.countryId : ''}
+                                    />
+                                </div>
+                            )}
 
                             <div className='mx-6'>
                                 <CustomTextField

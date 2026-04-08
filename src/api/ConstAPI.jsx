@@ -12,6 +12,7 @@ export const DEACTIVATE_VENDOR_PATH = "/general/vendor/deactivate";
 export const GET_VENDOR_TYPES_PATH = "/general/vendor-types";
 export const GET_PAYMENT_TERMS_PATH = "/general/payment-terms";
 export const GET_COUNTRIES_PATH = "/general/countries";
+export const GET_ACTIVE_COUNTRIES_PATH = "/countries/active";
 export const GET_STATES_PATH = "/general/states";
 export const GET_STATES_BY_COUNTRY_PATH = "/general/states/country";
 export const CREATE_VENDOR_PATH = "/general/vendor";

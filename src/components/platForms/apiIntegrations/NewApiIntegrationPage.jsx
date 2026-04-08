@@ -10,7 +10,7 @@ import CustomTextField from "../../CustomTextField";
 import UnionIcon from "../../../assets/icons/Union-icon.svg";
 import CustomButton from "../../CustomButton";
 import { setBreadcrumbs } from "../../../features/breadcrumb/breadcrumbSlice";
-import { getPlatformPresetsByProviderApi, getListsDropdownApi, getActivePlatformPresetsApi } from "../../../api/platforms";
+import { getPlatformPresetsByProviderApi, getListsDropdownApi, getActivePlatformPresetsApi, getActiveCountriesApi } from "../../../api/platforms";
 import LoadingSpinner from "../../common/LoadingSpinner";
 
 
@@ -40,6 +40,7 @@ function NewApiIntegrationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [platformOptions, setPlatformOptions] = useState([]);
   const [platformsLoading, setPlatformsLoading] = useState(true);
+  const [countryOptions, setCountryOptions] = useState([]);
   const dispatch = useDispatch();
 
   const formik = useFormik({
@@ -53,6 +54,7 @@ function NewApiIntegrationPage() {
       timeout: 60,
       postVariables: '',
       countryCode: false,
+      countryId: '',
       dateFormat: 'Y-m-d H:i:s',
       urlEncode: 'No',
       requestType: 'POST',
@@ -121,6 +123,8 @@ function NewApiIntegrationPage() {
         successful_response: values.successfulResponse || null,
         headers: processPlaceholders(parseJsonOrString(values.headers)),
         post_variables: processPlaceholders(parseJsonOrString(values.postVariables)),
+        is_country_code_enabled: values.countryCode,
+        country_id: values.countryId || null,
         field_mappings: values.fieldMapping ? (() => {
           try {
             return typeof values.fieldMapping === 'string'
@@ -162,6 +166,21 @@ function NewApiIntegrationPage() {
       }
     };
     fetchLists();
+
+    const fetchCountries = async () => {
+      try {
+        const response = await getActiveCountriesApi();
+        if (response?.data && Array.isArray(response.data)) {
+          setCountryOptions(response.data.map(country => ({
+            label: country.country_name,
+            value: String(country.id),
+          })));
+        }
+      } catch (error) {
+        console.error('Error fetching countries:', error);
+      }
+    };
+    fetchCountries();
   }, []);
 
   useEffect(() => {
@@ -503,6 +522,25 @@ function NewApiIntegrationPage() {
                 </div>
                 <span className="text-sm text-gray-500">{formik.values.countryCode ? 'Yes' : 'No'}</span>
               </div>
+
+              {/* Country dropdown - Show when country code is enabled */}
+              {formik.values.countryCode && (
+                <div className='mx-6'>
+                  <CustomTextField
+                    label="Country"
+                    name="countryId"
+                    isSelect={true}
+                    options={[
+                      { label: 'Select Country', value: '' },
+                      ...countryOptions,
+                    ]}
+                    value={formik.values.countryId}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.countryId ? formik.errors.countryId : ''}
+                  />
+                </div>
+              )}
 
               <div className='mx-6'>
                 <CustomTextField
