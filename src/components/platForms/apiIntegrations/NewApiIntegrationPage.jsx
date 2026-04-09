@@ -531,7 +531,7 @@ function NewApiIntegrationPage() {
                     name="countryId"
                     isSelect={true}
                     options={[
-                      { label: 'Select Country', value: '' },
+                      { label: 'Select Country', value: '', disabled: true },
                       ...countryOptions,
                     ]}
                     value={formik.values.countryId}

@@ -141,11 +141,16 @@ export default function CustomTextField({
                     return (
                       <li
                         key={idx}
-                        className={`px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between ${isMultiSelect
+                        className={`px-3 py-2 flex items-center justify-between ${
+                            opt.disabled 
+                              ? "opacity-50 cursor-not-allowed" 
+                              : "cursor-pointer hover:bg-gray-100"
+                          } ${isMultiSelect
                             ? (Array.isArray(currentValue) && currentValue.includes(opt.value) ? "bg-blue-50 text-primary" : "text-gray-700")
                             : (currentValue === opt.value ? "bg-gray-100 text-neutral" : "text-gray-700")
                           }`}
                         onClick={() => {
+                          if (opt.disabled) return;
                           if (opt.to) {
                             navigate(opt.to);
                             setOpen(false);

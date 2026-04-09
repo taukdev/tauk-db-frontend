@@ -17,14 +17,7 @@ const apiTypes = [
     { label: "Regular API", value: "Regular API" },
     // { label: "Ping/Post", value: "Ping/Post" },
 ];
-const urlEncodeOptions = [
-    { label: "Yes", value: "Yes" },
-    { label: "No", value: "No" },
-];
-const requestTypes = [
-    { label: "Post", value: "POST" },
-    // { label: "Get", value: "GET" },
-];
+
 
 const validationSchema = Yup.object({
     apiDescription: Yup.string().required("API description is required"),
@@ -557,7 +550,7 @@ function EditApiIntegrations() {
                                         name="countryId"
                                         isSelect={true}
                                         options={[
-                                            { label: 'Select Country', value: '' },
+                                            { label: 'Select Country', value: '', disabled: true },
                                             ...countryOptions,
                                         ]}
                                         value={formik.values.countryId}
