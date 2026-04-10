@@ -8,21 +8,10 @@ import {
 // Async thunk to fetch dropdown data
 export const fetchLeadDeliveryDropdown = createAsyncThunk(
   'leadDeliveryReport/fetchDropdown',
-  async (_, { rejectWithValue }) => {
+  async (params, { rejectWithValue }) => {
     try {
-      const response = await getLeadDeliveryDropdownApi();
-      // Handle response structure: { status: "success", data: { platforms: [...] } }
-      if (response?.data?.platforms && Array.isArray(response.data.platforms)) {
-        return response.data.platforms;
-      }
-      // Fallback for other structures
-      if (Array.isArray(response?.data)) {
-        return response.data;
-      }
-      if (Array.isArray(response)) {
-        return response;
-      }
-      return [];
+      const response = await getLeadDeliveryDropdownApi(params);
+      return response?.data || {};
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to fetch dropdown data');
     }
@@ -49,10 +38,11 @@ const leadDeliveryReportSlice = createSlice({
     showPanel: false,
     startDate: '',
     endDate: '',
-    selectedPlatforms: [],
-    leadType: 'Abandons Leads',
+    selectedVendors: [],
+    selectedLists: [],
     subtractReturnedLeads: false,
-    platforms: [],
+    vendors: [],
+    lists: [],
     // Dropdown data
     dropdownLoading: false,
     dropdownError: null,
@@ -74,24 +64,40 @@ const leadDeliveryReportSlice = createSlice({
     setEndDate: (state, action) => {
       state.endDate = action.payload;
     },
-    addSelectedPlatform: (state, action) => {
-      if (!state.selectedPlatforms.includes(action.payload)) {
-        state.selectedPlatforms.push(action.payload);
+    addSelectedVendor: (state, action) => {
+      if (!state.selectedVendors.includes(action.payload)) {
+        state.selectedVendors.push(action.payload);
       }
     },
-    removeSelectedPlatform: (state, action) => {
-      state.selectedPlatforms = state.selectedPlatforms.filter(
-        (platform) => platform !== action.payload
+    removeSelectedVendor: (state, action) => {
+      state.selectedVendors = state.selectedVendors.filter(
+        (v) => v !== action.payload
       );
     },
-    setSelectedPlatforms: (state, action) => {
-      state.selectedPlatforms = action.payload;
+    setSelectedVendors: (state, action) => {
+      state.selectedVendors = action.payload;
     },
-    clearSelectedPlatforms: (state) => {
-      state.selectedPlatforms = [];
+    clearSelectedVendors: (state) => {
+      state.selectedVendors = [];
+      state.selectedLists = [];
+      state.lists = [];
     },
-    setLeadType: (state, action) => {
-      state.leadType = action.payload;
+    addSelectedList: (state, action) => {
+      if (!state.selectedLists.includes(action.payload)) {
+        state.selectedLists.push(action.payload);
+      }
+    },
+    removeSelectedList: (state, action) => {
+      state.selectedLists = state.selectedLists.filter(
+        (l) => l !== action.payload
+      );
+    },
+    setSelectedLists: (state, action) => {
+      state.selectedLists = action.payload;
+    },
+    clearSelectedLists: (state) => {
+      state.selectedLists = [];
+      state.lists = [];
     },
     setSubtractReturnedLeads: (state, action) => {
       state.subtractReturnedLeads = action.payload;
@@ -106,9 +112,12 @@ const leadDeliveryReportSlice = createSlice({
       })
       .addCase(fetchLeadDeliveryDropdown.fulfilled, (state, action) => {
         state.dropdownLoading = false;
-        state.platforms = Array.isArray(action.payload)
-          ? action.payload
-          : [];
+        if (action.payload.vendors) {
+          state.vendors = action.payload.vendors;
+        }
+        if (action.payload.lists) {
+          state.lists = action.payload.lists;
+        }
       })
       .addCase(fetchLeadDeliveryDropdown.rejected, (state, action) => {
         state.dropdownLoading = false;
@@ -135,11 +144,14 @@ export const {
   setShowPanel,
   setStartDate,
   setEndDate,
-  addSelectedPlatform,
-  removeSelectedPlatform,
-  setSelectedPlatforms,
-  clearSelectedPlatforms,
-  setLeadType,
+  addSelectedVendor,
+  removeSelectedVendor,
+  setSelectedVendors,
+  clearSelectedVendors,
+  addSelectedList,
+  removeSelectedList,
+  setSelectedLists,
+  clearSelectedLists,
   setSubtractReturnedLeads,
 } = leadDeliveryReportSlice.actions;
 

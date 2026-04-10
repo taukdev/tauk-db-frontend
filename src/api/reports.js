@@ -35,10 +35,16 @@ export async function generateListImportStatsReportApi(payload) {
 }
 /**
  * Fetch lead delivery report dropdown data
+ * @param {Object} params - Query parameters
+ * @param {string} params.vendor_ids - Comma-separated vendor IDs
  * @returns {Promise} API response with dropdown options
  */
-export async function getLeadDeliveryDropdownApi() {
-  return await apiJson(GET_LEAD_DELIVERY_DROPDOWN_PATH, {
+export async function getLeadDeliveryDropdownApi(params = {}) {
+  let url = GET_LEAD_DELIVERY_DROPDOWN_PATH;
+  if (params.vendor_ids) {
+    url += `?vendor_ids=${params.vendor_ids}`;
+  }
+  return await apiJson(url, {
     method: "GET",
   });
 }

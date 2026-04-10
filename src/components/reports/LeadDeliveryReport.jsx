@@ -12,14 +12,17 @@ import {
   setShowPanel,
   setStartDate,
   setEndDate,
-  addSelectedPlatform,
-  removeSelectedPlatform,
-  setSelectedPlatforms,
-  clearSelectedPlatforms,
-  setLeadType,
+  addSelectedVendor,
+  removeSelectedVendor,
+  setSelectedVendors,
+  clearSelectedVendors,
+  addSelectedList,
+  removeSelectedList,
+  setSelectedLists,
+  clearSelectedLists,
   setSubtractReturnedLeads,
 } from "../../features/reports/LeadDeliveryReportSlice";
-import { Plus, Search, X } from "lucide-react";
+import { Calendar, ChevronDown, ChevronRight, Plus, Search, Users, X } from "lucide-react";
 import DatePickerField from "../DatePickerField";
 import { setBreadcrumbs } from "../../features/breadcrumb/breadcrumbSlice";
 import CustomButton from "../CustomButton";
@@ -35,14 +38,55 @@ const LeadDeliveryReport = () => {
     dates: '',
   });
 
+  const [expandedRows, setExpandedRows] = useState({}); // { [listId_platformId]: boolean }
+  const [expandedLists, setExpandedLists] = useState({}); // { [listId]: boolean }
+  const [activeVendorId, setActiveVendorId] = useState(null);
+
+
+
+  const toggleRow = (listId, platformId) => {
+    const key = `${listId}_${platformId}`;
+    setExpandedRows(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  const toggleList = (listId) => {
+    setExpandedLists(prev => ({
+      ...prev,
+      [listId]: !prev[listId]
+    }));
+  };
+
+  const groupDataByPlatform = (actualData) => {
+    if (!actualData || !Array.isArray(actualData)) return [];
+
+    const groups = {};
+    actualData.forEach(item => {
+      const pId = item.platform_id;
+      if (!groups[pId]) {
+        groups[pId] = {
+          platform_id: pId,
+          platform_name: item.platform_name,
+          attempts: []
+        };
+      }
+      groups[pId].attempts.push(item);
+    });
+
+    return Object.values(groups).sort((a, b) => b.attempts.length - a.attempts.length);
+  };
+
   const {
     searchQuery,
     showPanel,
     startDate,
     endDate,
-    selectedPlatforms,
-    platforms,
-    leadType,
+    selectedVendors,
+    selectedLists,
+    vendors,
+    lists,
     subtractReturnedLeads,
     dropdownLoading,
     dropdownError,
@@ -50,6 +94,13 @@ const LeadDeliveryReport = () => {
     reportLoading,
     reportError,
   } = useSelector((state) => state.leadDeliveryReport);
+
+  // Initialize active vendor when report data arrives
+  useEffect(() => {
+    if (reportData?.vendors?.length > 0 && !activeVendorId) {
+      setActiveVendorId(reportData.vendors[0].vendor_id);
+    }
+  }, [reportData, activeVendorId]);
 
   // Fetch dropdown data on mount
   useEffect(() => {
@@ -65,70 +116,74 @@ const LeadDeliveryReport = () => {
     );
   }, [dispatch]);
 
-  // Format dropdown options for display (format: "id - name")
-  const platformOptions = platforms
-    .map((platform) => {
-      if (typeof platform === 'string') return platform;
-      // Use display field if available, otherwise format manually
-      if (platform.display) return platform.display;
-      return `${platform.id} - ${platform.name || platform.platform_name || ''}`;
-    })
-    .filter((option) => {
-      // Filter by search query if provided
-      if (!searchQuery.trim()) return true;
-      const query = searchQuery.toLowerCase();
-      return option.toLowerCase().includes(query);
-    });
+  // Fetch lists whenever selected vendors change
+  useEffect(() => {
+    if (selectedVendors.length > 0) {
+      const vendorIds = selectedVendors.join(',');
 
-  // Store platform IDs for API call - need to match selected strings with platform objects
-  const selectedPlatformIds = selectedPlatforms.map((selectedItem) => {
-    // Find the platform object that matches the selected string
-    const platform = platforms.find((p) => {
-      if (typeof p === 'string') return p === selectedItem;
-      const display = p.display || `${p.id} - ${p.name || p.platform_name || ''}`;
-      return display === selectedItem;
-    });
-    
-    if (platform && typeof platform === 'object' && platform.id) {
-      return platform.id;
+      dispatch(fetchLeadDeliveryDropdown({ vendor_ids: vendorIds }));
+    } else {
+      // If no vendors selected, don't show any lists
+      dispatch(clearSelectedLists());
     }
-    
-    // Fallback: try to extract ID from formatted string "id - name"
-    if (typeof selectedItem === 'number') return selectedItem;
-    const match = selectedItem.match(/^(\d+)\s*-/);
-    if (match) {
-      return parseInt(match[1]);
-    }
-    
-    return null;
-  }).filter((id) => id !== null && id !== undefined);
+  }, [dispatch, selectedVendors]);
 
-  const handleSelect = (platform) => {
-    if (!selectedPlatforms.includes(platform)) {
-      dispatch(addSelectedPlatform(platform));
-      // Clear platform error when user selects a platform
-      if (validationErrors.platforms) {
-        setValidationErrors(prev => ({ ...prev, platforms: '' }));
+  // Sync effect: Remove selected lists that are no longer in the available lists
+  // This happens when a vendor is deselected and its lists are no longer fetched
+  useEffect(() => {
+    if (lists.length > 0 && selectedLists.length > 0) {
+      const availableListIds = lists.map(l => l.id);
+      const filteredSelectedLists = selectedLists.filter(sid => availableListIds.includes(sid));
+
+      if (filteredSelectedLists.length !== selectedLists.length) {
+        dispatch(setSelectedLists(filteredSelectedLists));
       }
     }
+  }, [dispatch, lists, selectedLists]);
+
+  const handleSelectVendor = (vendorId) => {
+    if (!selectedVendors.includes(vendorId)) {
+      dispatch(addSelectedVendor(vendorId));
+    }
   };
 
-  const handleDeselect = (platform) => {
-    dispatch(removeSelectedPlatform(platform));
+  const handleDeselectVendor = (vendorId) => {
+    dispatch(removeSelectedVendor(vendorId));
   };
 
-  const handleSelectAll = () => dispatch(setSelectedPlatforms(platformOptions.slice()));
-  const handleDeselectAll = () => dispatch(clearSelectedPlatforms());
+  const handleSelectAllVendors = () => {
+    const allVendorIds = vendors.map(v => v.id);
+    dispatch(setSelectedVendors(allVendorIds));
+  };
+
+  const handleDeselectAllVendors = () => dispatch(clearSelectedVendors());
+
+  const handleSelectList = (listId) => {
+    if (!selectedLists.includes(listId)) {
+      dispatch(addSelectedList(listId));
+    }
+  };
+
+  const handleDeselectList = (listId) => {
+    dispatch(removeSelectedList(listId));
+  };
+
+  const handleSelectAllLists = () => {
+    const allListIds = lists.map(l => l.id);
+    dispatch(setSelectedLists(allListIds));
+  };
+
+  const handleDeselectAllLists = () => dispatch(clearSelectedLists());
 
   const handleRunReport = () => {
     // Clear previous errors
-    setValidationErrors({ platforms: '', dates: '' });
+    setValidationErrors({ vendors: '', dates: '' });
 
-    // Validate platforms
-    if (selectedPlatforms.length === 0) {
+    // Validate vendors
+    if (selectedVendors.length === 0) {
       setValidationErrors(prev => ({
         ...prev,
-        platforms: 'Please select at least one platform'
+        vendors: 'Please select at least one vendor'
       }));
       return;
     }
@@ -142,23 +197,13 @@ const LeadDeliveryReport = () => {
       return;
     }
 
-    // Check if we have valid platform IDs
-    if (selectedPlatformIds.length === 0) {
-      setValidationErrors(prev => ({
-        ...prev,
-        platforms: 'Unable to extract platform IDs. Please try selecting platforms again.'
-      }));
-      return;
-    }
-
     const payload = {
-      platform_ids: selectedPlatformIds,
+      vendor_ids: selectedVendors,
+      list_ids: selectedLists,
       start_date: startDate,
       end_date: endDate,
-      leads_type: leadType,
     };
 
-    // Add optional parameter
     if (subtractReturnedLeads) {
       payload.subtract_returned_leads = true;
     }
@@ -218,112 +263,195 @@ const LeadDeliveryReport = () => {
             </p>
           </div>
         ) : reportData ? (
-          <div className="p-3 sm:p-4 md:p-6">
+          <div className="">
             {/* Summary Section */}
             {reportData.summary && (
-              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-base sm:text-lg font-semibold text-primary-dark mb-3 sm:mb-4">
-                  Summary
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-                  {Object.entries(reportData.summary).map(([key, value]) => {
-                    if (key === 'date_range' || typeof value === 'object') return null;
-                    return (
-                      <div key={key} className="text-center sm:text-left">
-                        <p className="text-xs sm:text-sm text-gray-600 mb-1 capitalize">
-                          {key.replace(/_/g, ' ')}
-                        </p>
-                        <p className="text-lg sm:text-xl font-bold text-primary-dark">
-                          {value || 0}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-                {reportData.summary.date_range && (
-                  <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600 break-words">
-                    <p>
-                      <span className="font-medium">Date Range:</span>{' '}
-                      <span className="block sm:inline">{reportData.summary.date_range.start}</span>
-                      {' '}to{' '}
-                      <span className="block sm:inline">{reportData.summary.date_range.end}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+           
+                {/* <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-subtle flex items-center gap-4 hover:shadow-md transition-shadow">
+                  <div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-wider text-gray-400 font-bold">Total Leads Collected</p>
+                    <p className="text-2xl font-black text-primary-dark leading-none mt-1">
+                      {(reportData.summary.total_leads_collected || 0).toLocaleString()}
                     </p>
                   </div>
-                )}
+                </div> */}
+
+                {/* Date Range Card */}
+                {/* <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-subtle flex items-center gap-4 hover:shadow-md transition-shadow">
+                  <div className="h-12 w-12 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
+                    <Calendar className="h-6 w-6 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-wider text-gray-400 font-bold">Reporting Period</p>
+                    <p className="text-sm font-bold text-primary-dark mt-1">
+                      {reportData.summary.date_range?.start} — {reportData.summary.date_range?.end}
+                    </p>
+                  </div>
+                </div> */}
               </div>
             )}
 
-            {/* By Platform Section */}
-            {reportData.by_platform && reportData.by_platform.length > 0 && (
-              <div className="mb-4 sm:mb-6">
-                <h3 className="text-base sm:text-lg font-semibold text-primary-dark mb-3 sm:mb-4">
-                  By Platform
-                </h3>
-                {/* Mobile Card View */}
-                <div className="block md:hidden space-y-3">
-                  {reportData.by_platform.map((platform, index) => (
-                    <div
-                      key={platform.platform_id || index}
-                      className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm"
-                    >
-                      <h4 className="font-semibold text-primary-dark mb-3 text-sm sm:text-base">
-                        {platform.platform_name || `Platform ${platform.platform_id}`}
-                      </h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        {Object.entries(platform).map(([key, value]) => {
-                          if (key === 'platform_id' || key === 'platform_name' || typeof value === 'object') return null;
-                          return (
-                            <div key={key}>
-                              <p className="text-xs text-gray-600 capitalize">
-                                {key.replace(/_/g, ' ')}
-                              </p>
-                              <p className="text-sm font-semibold text-primary-dark">
-                                {value || 0}
-                              </p>
-                            </div>
-                          );
-                        })}
-                      </div>
+            {/* Split View Container */}
+            {reportData.vendors && reportData.vendors.length > 0 ? (
+              <div className="flex flex-col lg:flex-row gap-6 items-start">
+
+                {/* Left Sidebar: Vendor List */}
+                <div className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-4 h-fit">
+                  <div className="bg-white border border-gray-100 rounded-sm overflow-hidden">
+                    <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                      <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Vendors</h4>
                     </div>
-                  ))}
-                </div>
-                {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6">
-                  <table className="min-w-full border border-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium">
-                          Platform Name
-                        </th>
-                        {reportData.by_platform[0] && Object.keys(reportData.by_platform[0])
-                          .filter(key => key !== 'platform_id' && key !== 'platform_name' && typeof reportData.by_platform[0][key] !== 'object')
-                          .map((key) => (
-                            <th key={key} className="px-3 sm:px-4 py-2 text-left border border-gray-200 text-xs sm:text-sm font-medium capitalize">
-                              {key.replace(/_/g, ' ')}
-                            </th>
-                          ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {reportData.by_platform.map((platform, index) => (
-                        <tr key={platform.platform_id || index} className="bg-white">
-                          <td className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
-                            {platform.platform_name || `Platform ${platform.platform_id}`}
-                          </td>
-                          {Object.entries(platform)
-                            .filter(([key]) => key !== 'platform_id' && key !== 'platform_name' && typeof platform[key] !== 'object')
-                            .map(([key, value]) => (
-                              <td key={key} className="px-3 sm:px-4 py-2 border border-gray-200 text-xs sm:text-sm">
-                                {value || 0}
-                              </td>
-                            ))}
-                        </tr>
+                    <ul className="divide-y divide-gray-100">
+                      {reportData.vendors.map((v) => (
+                        <li 
+                          key={v.vendor_id}
+                          onClick={() => setActiveVendorId(v.vendor_id)}
+                          className={`px-4 py-3 text-sm cursor-pointer transition-all flex items-center justify-between group ${activeVendorId === v.vendor_id
+                            ? "bg-blue-50 text-primary font-semibold"
+                            : "text-gray-600 hover:bg-gray-50"
+                          }`}
+                        >
+                          <span className="truncate">{v.vendor_name}</span>
+                          {activeVendorId === v.vendor_id && (
+                            <div className="h-2 w-2 rounded-full bg-primary" />
+                          )}
+                        </li>
                       ))}
-                    </tbody>
-                  </table>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Right Content: Selected Vendor Details */}
+                <div className="flex-1 min-w-0 w-full space-y-6">
+                  {reportData.vendors
+                    .filter(v => v.vendor_id === activeVendorId)
+                    .map((vendor, vIdx) => (
+                      <div key={vendor.vendor_id || vIdx} className="rounded-lg overflow-hidden bg-white animate-in fade-in slide-in-from-right-4 duration-300">
+
+                        <div className="p-0 space-y-0">
+                          {vendor.lists && vendor.lists.length > 0 ? (
+                            vendor.lists.map((list, lIdx) => (
+                              <div key={list.list_id || lIdx} className="p-2 border-b border-gray-200 last:border-0">
+                                {/* List Meta Header */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4 pb-2">
+                                    <div>
+                                    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">List ID & Name</p>
+                                      <p className="text-sm font-bold text-primary-dark">{list.list_id} - {list.list_name}</p>
+                                    </div>
+                                    <div>
+                                    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Collection Time</p>
+                                      <p className="text-sm font-semibold text-gray-700">{list.collection_time ? new Date(list.collection_time).toLocaleString() : 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Last Send</p>
+                                      <p className="text-sm font-semibold text-gray-700">{list.last_send_time ? new Date(list.last_send_time).toLocaleString() : 'Never'}</p>
+                                    </div>
+                                    <div>
+                                    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Status</p>
+                                      <span className={`inline-block text-[10px] px-2 py-0.5 rounded-md font-bold uppercase ${list.last_send_status === 'success' ? 'bg-green-50 text-green-600 border border-green-100' :
+                                          list.last_send_status === 'failed' ? 'bg-red-50 text-red-600 border border-red-100' :
+                                            'bg-gray-50 text-gray-500 border border-gray-100'
+                                        }`}>
+                                        {list.last_send_status}
+                                      </span>
+                                  </div>
+                                </div>
+
+                                    {/* Delivery Table */}
+                                <div className="overflow-hidden">
+                                  <table className="min-w-full">
+                                        <thead className="bg-[#fafbfc]">
+                                          <tr>
+                                            <th className="w-10 px-4 py-3"></th>
+                                            <th className="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Platform Name</th>
+                                            <th className="px-4 py-3 text-right text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Delivery</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-100">
+                                          {list.actual_data && list.actual_data.length > 0 ? (
+                                            groupDataByPlatform(list.actual_data).map((group, gIdx) => (
+                                              <React.Fragment key={group.platform_id || gIdx}>
+                                                <tr className="hover:bg-blue-50/30 transition-colors cursor-pointer group" onClick={() => toggleRow(list.list_id, group.platform_id)}>
+                                                  <td className="px-4 py-3 text-center">
+                                                    {expandedRows[`${list.list_id}_${group.platform_id}`] ? (
+                                                      <ChevronDown className="h-4 w-4 text-primary animate-in fade-in zoom-in duration-200" />
+                                                    ) : (
+                                                      <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-primary transition-colors" />
+                                                    )}
+                                                  </td>
+                                                  <td className="px-4 py-3 text-xs font-bold text-gray-700">{group.platform_name}</td>
+                                                  <td className="px-4 py-3 text-xs text-right font-bold text-primary">
+                                                    {(group.attempts?.length || 0).toLocaleString()}
+                                                  </td>
+                                                </tr>
+                                                {expandedRows[`${list.list_id}_${group.platform_id}`] && (
+                                                  <tr>
+                                                    <td colSpan="3" className="px-4 py-0 bg-gray-50/50">
+                                                      <div className="animate-in slide-in-from-top-2 duration-300">
+                                                        <div className="">
+                                                          <table className="min-w-full">
+                                                            <thead className="">
+                                                              <tr>
+                                                                <th className="px-4 py-2 text-left text-[10px] font-bold text-gray-400 uppercase">Lead Email</th>
+                                                                <th className="px-4 py-2 text-center text-[10px] font-bold text-gray-400 uppercase">Status</th>
+                                                                <th className="px-4 py-2 text-center text-[10px] font-bold text-gray-400 uppercase">Time Taken</th>
+                                                                <th className="px-4 py-2 text-right text-[10px] font-bold text-gray-400 uppercase">Sent At</th>
+                                                              </tr>
+                                                            </thead>
+                                                            <tbody className="divide-y divide-gray-100">
+                                                              {group.attempts.map((attempt, aIdx) => (
+                                                                <tr key={aIdx} className="hover:bg-blue-50/20 transition-colors">
+                                                                  <td className="px-4 py-2 text-xs text-gray-600 font-medium">{attempt.lead_email}</td>
+                                                                  <td className="px-4 py-2 text-center">
+                                                                    <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase ${attempt.status === 'success' ? 'text-green-600 bg-green-50' : attempt.status === 'rejected' ? 'text-orange-600 bg-orange-50' : 'text-red-600 bg-red-50'}`}>
+                                                                      {attempt.status}
+                                                                    </span>
+                                                                  </td>
+                                                                  <td className="px-4 py-2 text-center text-xs text-gray-500 font-medium">{attempt.time_taken}</td>
+                                                                  <td className="px-4 py-2 text-right text-xs text-gray-400">
+                                                                    {attempt.sent_at ? new Date(attempt.sent_at).toLocaleString() : 'N/A'}
+                                                                  </td>
+                                                                </tr>
+                                                              ))}
+                                                            </tbody>
+                                                          </table>
+                                                        </div>
+                                                      </div>
+                                                    </td>
+                                                  </tr>
+                                                )}
+                                              </React.Fragment>
+                                            ))
+                                          ) : (
+                                            <tr>
+                                              <td colSpan="3" className="px-4 py-10 text-center text-xs text-gray-400 font-medium italic">No delivery data found for this date range</td>
+                                            </tr>
+                                          )}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="p-12 text-center">
+                              <p className="text-sm text-gray-400 italic">No lists found for this vendor matching the selection</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               </div>
+            ) : (
+              <div className="py-20 text-center">
+                <p className="text-gray-400">No data found for the selected vendors/lists.</p>
+              </div>
             )}
+
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[550px] text-center p-4 sm:p-6">
@@ -361,55 +489,34 @@ const LeadDeliveryReport = () => {
             </div>
 
             <div className="p-6 h-[calc(100%-64px)]">
-              {/* Platform Selection */}
+              {/* Vendor Selection */}
               <div className="mb-6">
                 <h3 className="text-primary-dark text-sm font-medium mb-3">
-                  Select Platforms
+                  Select Vendors
                 </h3>
-                <div className="flex items-center gap-3">
-                  <div className="relative w-full">
-                    <input
-                      type="text"
-                      placeholder="Search lists by name or ID"
-                      value={searchQuery}
-                      onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-                      className="w-full border border-gray-300 bg-neutral-input rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                    />
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                  </div>
-                  <h4 className="text-sm text-neutral font-medium mb-2 w-full">
-                    You have selected
-                  </h4>
-                </div>
-
                 <div className="flex gap-3 justify-between">
-                  {/* Available Platforms */}
                   <div className="mt-3 w-full">
                     <div className="rounded-lg border border-separator overflow-hidden">
                       <div className="h-48 overflow-y-auto bg-neutral-input">
                         <ul className="divide-y divide-gray-100">
-                          {dropdownLoading ? (
+                          {dropdownLoading && vendors.length === 0 ? (
                             <li className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-400">
-                              Loading platforms...
+                              Loading vendors...
                             </li>
-                          ) : dropdownError ? (
-                            <li className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-red-500">
-                              Error loading platforms: {dropdownError}
-                            </li>
-                          ) : platformOptions.length === 0 ? (
+                          ) : vendors.length === 0 ? (
                             <li className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-400">
-                              No platforms available
+                              No vendors available
                             </li>
                           ) : (
-                            platformOptions
-                              .filter((p) => !selectedPlatforms.includes(p))
-                              .map((platform) => (
+                            vendors
+                              .filter((v) => !selectedVendors.includes(v.id))
+                              .map((vendor) => (
                                 <li
-                                  key={platform}
+                                  key={vendor.id}
                                   className="px-3 sm:px-4 text-xs sm:text-sm py-2 cursor-pointer hover:bg-[#F5F7F9] break-words"
-                                  onClick={() => handleSelect(platform)}
+                                  onClick={() => handleSelectVendor(vendor.id)}
                                 >
-                                  {platform}
+                                  {vendor.display || vendor.vendor_name}
                                 </li>
                               ))
                           )}
@@ -418,54 +525,117 @@ const LeadDeliveryReport = () => {
                     </div>
                   </div>
 
-                  {/* Selected Platforms */}
                   <div className="mt-3 w-full">
                     <div className="rounded-lg border border-separator overflow-hidden">
                       <div className="h-48 overflow-y-auto bg-neutral-input">
                         <ul className="divide-y divide-gray-100">
-                          {selectedPlatforms.length === 0 ? (
-                            <li className="px-4 py-2 text-sm text-gray-400">
-                              No platforms selected
+                          {selectedVendors.length === 0 ? (
+                            <li className="px-4 py-2 text-sm text-gray-400 text-center">
+                              No vendors selected
                             </li>
                           ) : (
-                            selectedPlatforms.map((platform) => (
-                              <li
-                                key={platform}
-                                className="px-4 py-2 text-sm cursor-pointer hover:bg-[#F5F7F9] flex items-center justify-between"
-                                onClick={() => handleDeselect(platform)}
-                              >
-                                {platform}
-                                <X className="h-4 w-4 text-gray-400" />
-                              </li>
-                            ))
+                            selectedVendors.map((vendorId) => {
+                              const vendor = vendors.find(v => v.id === vendorId);
+                              const displayName = vendor?.display || vendor?.vendor_name || `Vendor ${vendorId}`;
+                              return (
+                                <li
+                                  key={vendorId}
+                                  className="px-4 py-2 text-sm cursor-pointer hover:bg-[#F5F7F9] flex items-center justify-between"
+                                  onClick={() => handleDeselectVendor(vendorId)}
+                                >
+                                  {displayName}
+                                  <X className="h-4 w-4 text-gray-400" />
+                                </li>
+                              );
+                            })
                           )}
                         </ul>
                       </div>
                     </div>
                   </div>
                 </div>
-
                 <div className="mt-3 text-[13px] text-start">
-                  <button
-                    type="button"
-                    className="text-primary underline decoration-dashed underline-offset-4 mr-2 cursor-pointer"
-                    onClick={handleSelectAll}
-                  >
-                    Select All
-                  </button>
-                  /
-                  <button
-                    type="button"
-                    className="text-primary underline decoration-dashed underline-offset-4 ml-2 cursor-pointer"
-                    onClick={handleDeselectAll}
-                  >
-                    Deselect All
-                  </button>
+                  <button type="button" className="text-primary underline decoration-dashed underline-offset-4 mr-2 cursor-pointer" onClick={handleSelectAllVendors}>Select All</button> /
+                  <button type="button" className="text-primary underline decoration-dashed underline-offset-4 ml-2 cursor-pointer" onClick={handleDeselectAllVendors}>Deselect All</button>
                 </div>
-                {/* Platform Validation Error */}
-                {validationErrors.platforms && (
+              </div>
+
+              {/* List Selection */}
+              <div className="mb-6">
+                <h3 className="text-primary-dark text-sm font-medium mb-3">
+                  Select Lists
+                </h3>
+                <div className="flex gap-3 justify-between">
+                  <div className="mt-3 w-full">
+                    <div className="rounded-lg border border-separator overflow-hidden">
+                      <div className="h-48 overflow-y-auto bg-neutral-input">
+                        <ul className="divide-y divide-gray-100">
+                          {dropdownLoading && lists.length === 0 ? (
+                            <li className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-400">
+                              Loading lists...
+                            </li>
+                          ) : selectedVendors.length === 0 ? (
+                            <li className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-400 text-center">
+                              Please select a vendor first
+                            </li>
+                          ) : lists.length === 0 ? (
+                            <li className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-400 text-center">
+                              No lists found for selected vendors
+                            </li>
+                          ) : (
+                            lists
+                              .filter((l) => !selectedLists.includes(l.id))
+                              .map((list) => (
+                                <li
+                                  key={list.id}
+                                  className="px-3 sm:px-4 text-xs sm:text-sm py-2 cursor-pointer hover:bg-[#F5F7F9] break-words"
+                                  onClick={() => handleSelectList(list.id)}
+                                >
+                                  {list.display || `${list.id} - ${list.list_name}`}
+                                </li>
+                              ))
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 w-full">
+                    <div className="rounded-lg border border-separator overflow-hidden">
+                      <div className="h-48 overflow-y-auto bg-neutral-input">
+                        <ul className="divide-y divide-gray-100">
+                          {selectedLists.length === 0 ? (
+                            <li className="px-4 py-2 text-sm text-gray-400 text-center">
+                              No lists selected
+                            </li>
+                          ) : (
+                            selectedLists.map((listId) => {
+                              const list = lists.find(l => l.id === listId);
+                              const displayName = list?.display || `${listId} - ${list?.list_name || 'List'}`;
+                              return (
+                                <li
+                                  key={listId}
+                                  className="px-4 py-2 text-sm cursor-pointer hover:bg-[#F5F7F9] flex items-center justify-between"
+                                  onClick={() => handleDeselectList(listId)}
+                                >
+                                  {displayName}
+                                  <X className="h-4 w-4 text-gray-400" />
+                                </li>
+                              );
+                            })
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 text-[13px] text-start">
+                  <button type="button" className="text-primary underline decoration-dashed underline-offset-4 mr-2 cursor-pointer" onClick={handleSelectAllLists}>Select All</button> /
+                  <button type="button" className="text-primary underline decoration-dashed underline-offset-4 ml-2 cursor-pointer" onClick={handleDeselectAllLists}>Deselect All</button>
+                </div>
+                {validationErrors.vendors && (
                   <div className="mt-2 text-xs text-red-500">
-                    {validationErrors.platforms}
+                    {validationErrors.vendors}
                   </div>
                 )}
               </div>
@@ -482,7 +652,6 @@ const LeadDeliveryReport = () => {
                       value={startDate}
                       onChange={(val) => {
                         dispatch(setStartDate(val));
-                        // Clear date error when user selects a date
                         if (val) {
                           setValidationErrors(prev => ({ ...prev, dates: '' }));
                         }
@@ -499,7 +668,6 @@ const LeadDeliveryReport = () => {
                       value={endDate}
                       onChange={(val) => {
                         dispatch(setEndDate(val));
-                        // Clear date error when user selects a date
                         if (val) {
                           setValidationErrors(prev => ({ ...prev, dates: '' }));
                         }
@@ -507,35 +675,11 @@ const LeadDeliveryReport = () => {
                     />
                   </div>
                 </div>
-                {/* Date Validation Error */}
                 {validationErrors.dates && (
                   <div className="text-xs text-red-500">
                     {validationErrors.dates}
                   </div>
                 )}
-              </div>
-
-              {/* Lead Type */}
-              <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                <label className="text-xs sm:text-sm text-neutral block mb-0 sm:mb-2 w-full sm:w-24 flex-shrink-0">
-                  Leads Type
-                </label>
-
-                <div className="relative w-full flex-1">
-                  <CustomTextField
-                    name="leadType"
-                    isSelect
-                    placeholder="Select Lead Type"
-                    options={[
-                      { label: "Abandons Leads", value: "Abandons Leads" },
-                      { label: "Buyers Leads", value: "Buyers Leads" },
-                      { label: "Declines Leads", value: "Declines Leads" },
-                    ]}
-                    value={leadType}
-                    onChange={(e) => dispatch(setLeadType(e.target.value))}
-                    size="sm"
-                  />
-                </div>
               </div>
 
 

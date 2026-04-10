@@ -49,18 +49,21 @@ export default function DatePickerField({
     onClose: () => setOpen(false),
     value: selectedDay,
     onChange: handleChange,
-    renderInput: (params) => (
-      <TextField
-        {...params}
-        sx={{
-          width: 0,
-          height: 0,
-          visibility: "hidden",
-          position: "absolute",
-          pointerEvents: "none",
-        }}
-      />
-    ),
+    enableAccessibleFieldDOMStructure: false,
+    slots: {
+      textField: (params) => (
+        <TextField
+          {...params}
+          sx={{
+            width: 0,
+            height: 0,
+            visibility: "hidden",
+            position: "absolute",
+            pointerEvents: "none",
+          }}
+        />
+      ),
+    },
   };
 
   // ⭐ FIX: Popper never goes outside & stays responsive
