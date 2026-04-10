@@ -37,18 +37,32 @@ export const fetchPlatformDropdowns = createAsyncThunk(
   "platform/fetchPlatformDropdowns",
   async (_, { rejectWithValue }) => {
     try {
-      const [types, terms, countries, cutoffs] = await Promise.all([
+      const results = await Promise.allSettled([
         getPlatformTypesApi(),
         getPaymentTermsApi(),
         getCountriesApi(),
         getLeadReturnCutoffsApi()
       ]);
 
+      const [typesRes, termsRes, countriesRes, cutoffsRes] = results;
+
+      if (typesRes.status === 'rejected') console.error("Failed to fetch platform types:", typesRes.reason);
+      if (termsRes.status === 'rejected') console.error("Failed to fetch payment terms:", termsRes.reason);
+      if (countriesRes.status === 'rejected') console.error("Failed to fetch countries:", countriesRes.reason);
+      if (cutoffsRes.status === 'rejected') console.error("Failed to fetch lead return cutoffs:", cutoffsRes.reason);
+
+      const extract = (res) => {
+        if (res.status === 'fulfilled') {
+          return res.value?.data || res.value;
+        }
+        return [];
+      };
+
       return {
-        types: types?.data || types,
-        terms: terms?.data || terms,
-        countries: countries?.data || countries,
-        cutoffs: cutoffs?.data || cutoffs
+        types: extract(typesRes),
+        terms: extract(termsRes),
+        countries: extract(countriesRes),
+        cutoffs: extract(cutoffsRes)
       };
     } catch (error) {
       return rejectWithValue(error.message || "Failed to fetch dropdowns");

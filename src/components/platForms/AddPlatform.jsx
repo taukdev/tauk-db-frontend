@@ -36,24 +36,24 @@ const AddPlatform = () => {
         dispatch(fetchPlatformDropdowns());
     }, [dispatch]);
 
-    // Derived options from API
-    const platformTypes = dropdowns.types.map(t => ({
+    // Derived options from API with safety checks
+    const platformTypes = (dropdowns?.types || []).map(t => ({
         label: t.type_name || t.name || t.label || String(t.id || ""),
         value: String(t.id || t.value || t)
     }));
-    const paymentTerms = dropdowns.terms.map(t => ({
+    const paymentTerms = (dropdowns?.terms || []).map(t => ({
         label: t.term_name || t.name || t.label || String(t.id || ""),
         value: String(t.id || t.value || t)
     }));
-    const countries = dropdowns.countries.map(c => ({
+    const countries = (dropdowns?.countries || []).map(c => ({
         label: c.country_name || c.name || c.label || String(c.id || ""),
         value: String(c.id || c.value || c)
     }));
-    const states = dropdowns.states.map(s => ({
+    const states = (dropdowns?.states || []).map(s => ({
         label: s.state_name || s.name || s.label || String(s.id || ""),
         value: String(s.id || s.value || s)
     }));
-    const cutoffs = dropdowns.cutoffs.map(c => ({
+    const cutoffs = (dropdowns?.cutoffs || []).map(c => ({
         label: c.cutoff_label || c.name || c.label || String(c.id || ""),
         value: String(c.id || c.value || c)
     }));
