@@ -267,8 +267,8 @@ const LeadDeliveryReport = () => {
             {/* Summary Section */}
             {reportData.summary && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-           
-                {/* <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-subtle flex items-center gap-4 hover:shadow-md transition-shadow">
+                {/* Total Leads Card */}
+                <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-subtle flex items-center gap-4 hover:shadow-md transition-shadow">
                   <div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
                     <Users className="h-6 w-6 text-primary" />
                   </div>
@@ -278,10 +278,10 @@ const LeadDeliveryReport = () => {
                       {(reportData.summary.total_leads_collected || 0).toLocaleString()}
                     </p>
                   </div>
-                </div> */}
+                </div>
 
                 {/* Date Range Card */}
-                {/* <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-subtle flex items-center gap-4 hover:shadow-md transition-shadow">
+                <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-subtle flex items-center gap-4 hover:shadow-md transition-shadow">
                   <div className="h-12 w-12 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
                     <Calendar className="h-6 w-6 text-orange-500" />
                   </div>
@@ -291,7 +291,7 @@ const LeadDeliveryReport = () => {
                       {reportData.summary.date_range?.start} — {reportData.summary.date_range?.end}
                     </p>
                   </div>
-                </div> */}
+                </div>
               </div>
             )}
 
@@ -301,24 +301,25 @@ const LeadDeliveryReport = () => {
 
                 {/* Left Sidebar: Vendor List */}
                 <div className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-4 h-fit">
-                  <div className="bg-white border border-gray-100 rounded-sm overflow-hidden">
+                  <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
                     <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
                       <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Vendors</h4>
                     </div>
-                    <ul className="divide-y divide-gray-100">
+                    <ul className="p-2 space-y-1">
                       {reportData.vendors.map((v) => (
                         <li 
                           key={v.vendor_id}
                           onClick={() => setActiveVendorId(v.vendor_id)}
-                          className={`px-4 py-3 text-sm cursor-pointer transition-all flex items-center justify-between group ${activeVendorId === v.vendor_id
-                            ? "bg-blue-50 text-primary font-semibold"
-                            : "text-gray-600 hover:bg-gray-50"
+                          className={`px-4 py-2.5 text-sm cursor-pointer rounded-lg transition-all flex items-center justify-between group ${
+                            activeVendorId === v.vendor_id 
+                              ? "bg-primary font-bold" 
+                              : "text-gray-600 hover:bg-gray-50 hover:text-primary"
                           }`}
                         >
                           <span className="truncate">{v.vendor_name}</span>
-                          {activeVendorId === v.vendor_id && (
-                            <div className="h-2 w-2 rounded-full bg-primary" />
-                          )}
+                          <div className={`h-1.5 w-1.5 rounded-full transition-all ${
+                            activeVendorId === v.vendor_id ? "bg-white scale-125" : "bg-transparent group-hover:bg-gray-300"
+                          }`} />
                         </li>
                       ))}
                     </ul>
@@ -335,35 +336,46 @@ const LeadDeliveryReport = () => {
                         <div className="p-0 space-y-0">
                           {vendor.lists && vendor.lists.length > 0 ? (
                             vendor.lists.map((list, lIdx) => (
-                              <div key={list.list_id || lIdx} className="p-2 border-b border-gray-200 last:border-0">
-                                {/* List Meta Header */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4 pb-2">
+                              <div key={list.list_id || lIdx} className="border-b border-gray-100 last:border-0 shadow-sm mb-4 bg-white rounded-lg overflow-hidden">
+                                {/* Expandable List Header */}
+                                <div 
+                                  className="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
+                                  onClick={() => toggleList(list.list_id)}
+                                >
+                                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div>
-                                    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">List ID & Name</p>
+                                      <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-0.5">List ID & Name</p>
                                       <p className="text-sm font-bold text-primary-dark">{list.list_id} - {list.list_name}</p>
                                     </div>
                                     <div>
-                                    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Collection Time</p>
+                                      <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-0.5">Collection Time</p>
                                       <p className="text-sm font-semibold text-gray-700">{list.collection_time ? new Date(list.collection_time).toLocaleString() : 'N/A'}</p>
                                     </div>
                                     <div>
-                                    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Last Send</p>
+                                      <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-0.5">Last Send</p>
                                       <p className="text-sm font-semibold text-gray-700">{list.last_send_time ? new Date(list.last_send_time).toLocaleString() : 'Never'}</p>
                                     </div>
                                     <div>
-                                    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Status</p>
+                                      <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-0.5">Status</p>
                                       <span className={`inline-block text-[10px] px-2 py-0.5 rounded-md font-bold uppercase ${list.last_send_status === 'success' ? 'bg-green-50 text-green-600 border border-green-100' :
                                           list.last_send_status === 'failed' ? 'bg-red-50 text-red-600 border border-red-100' :
                                             'bg-gray-50 text-gray-500 border border-gray-100'
                                         }`}>
                                         {list.last_send_status}
                                       </span>
+                                    </div>
+                                  </div>
+                                  <div className="ml-4 h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                                    {expandedLists[list.list_id] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                                   </div>
                                 </div>
 
+                                {/* List Body (Expandable) */}
+                                {expandedLists[list.list_id] && (
+                                  <div className="px-5 pb-5 animate-in slide-in-from-top-2 duration-300">
                                     {/* Delivery Table */}
-                                <div className="overflow-hidden">
-                                  <table className="min-w-full">
+                                    <div className="overflow-hidden rounded-lg border border-gray-100">
+                                      <table className="min-w-full divide-y divide-gray-100 table-fixed">
                                         <thead className="bg-[#fafbfc]">
                                           <tr>
                                             <th className="w-10 px-4 py-3"></th>
@@ -434,6 +446,8 @@ const LeadDeliveryReport = () => {
                                         </tbody>
                                       </table>
                                     </div>
+                                  </div>
+                                )}
                               </div>
                             ))
                           ) : (
