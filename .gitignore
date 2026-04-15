@@ -11,10 +11,6 @@ dist-ssr/
 .vite/
 
 # Environment files     
-.env
-.env.local
-.env.development
-.env.production
 .env.*.local
 
 # Logs
@@ -43,3 +39,4 @@ coverage/
 
 # Optional (if using)
 .eslintcache
+config.bat
